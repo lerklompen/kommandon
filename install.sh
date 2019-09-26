@@ -20,7 +20,7 @@ checkos=$(uname -s)
 echo $checkarch
 echo $checkos
 
-
+# check for file and write or overwrite
 if [ -f ~/check ]; then
     echo "file found"
     echo "overwritten" > ~/check
