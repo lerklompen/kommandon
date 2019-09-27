@@ -1,5 +1,19 @@
 #!/usr/bin/env bash
 
+update() {
+  # check for file and write or overwrite
+  if [ -f ~/.kommandon ]; then
+    echo "file found"
+    echo "alias gam='~/bin/gamadv-xtd3/gam'" > ~/.kommandon
+  else
+    touch ~/.kommandon
+    echo "#new file" >> ~/.kommandon
+    echo "alias gam='~/bin/gamadv-xtd3/gam'" >> ~/.kommandon
+  fi
+# perform "source"
+source ~/.kommandon
+}
+
 usage()
 {
 cat << EOF
@@ -37,21 +51,6 @@ case `grep "kommandon" ~/.bashrc >/dev/null; echo $?` in
     echo "error finding .kommandon"
     ;;
 esac
-
-update() {
-  # check for file and write or overwrite
-  if [ -f ~/.kommandon ]; then
-    echo "file found"
-    echo "alias gam='~/bin/gamadv-xtd3/gam'" > ~/.kommandon
-  else
-    touch ~/.kommandon
-    echo "#new file" >> ~/.kommandon
-    echo "alias gam='~/bin/gamadv-xtd3/gam'" >> ~/.kommandon
-  fi
-# perform "source"
-source ~/.kommandon
-}
-
 
 
 #if [ -f ~/.aliases ]; then
