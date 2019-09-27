@@ -21,27 +21,30 @@ echo $checkos
 
 # TODO - mac: ".bash_profile" Linux: ".bashrc"
 
-bash_string="if [ -f ~/.aliases ]; then\n    . ~/.aliases\n    source ~/.aliases\nfi"
+bash_string="if [ -f ~/.kommandon ]; then\n    . ~/.kommandon\n    source ~/.kommandon\nfi"
 
-case `grep ".kommandon.sh" ~/.bashrc >/dev/null; echo $?` in
+case `grep ".kommandon" ~/.bashrc >/dev/null; echo $?` in
   0)
-    echo "kommandon.sh not found"
-    echo ${bash_string} >> ~/.bashrc
+    echo ".kommandon not found"
+    echo -e ${bash_string} >> ~/.bashrc
     source ~/.bashrc
+    ;;
   1)
-    echo "kommandon.sh found"
+    echo ".kommandon found"
+    ;;
   *)
-    echo "error finding kommandon.sh"
+    echo "error finding .kommandon"
+    ;;
 esac
 
 # check for file and write or overwrite
-if [ -f ~/.kommandon.sh ]; then
+if [ -f ~/.kommandon ]; then
     echo "file found"
-    echo "alias gam='~/bin/gamadv-xtd3/gam'" > ~/.kommandon.sh
+    echo "alias gam='~/bin/gamadv-xtd3/gam'" > ~/.kommandon
 else
-    touch ~/.kommandon.sh
-    echo "#new file" >> ~/.kommandon.sh
-    echo "alias gam='~/bin/gamadv-xtd3/gam'" >> ~/.kommandon.sh
+    touch ~/.kommandon
+    echo "#new file" >> ~/.kommandon
+    echo "alias gam='~/bin/gamadv-xtd3/gam'" >> ~/.kommandon
 fi
 
 
