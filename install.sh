@@ -30,6 +30,7 @@ case `grep "kommandon" ~/.bashrc >/dev/null; echo $?` in
   1)
     echo "kommandon not found"
     echo -e ${bash_string} >> ~/.bashrc
+    update
     source ~/.bashrc
     ;;
   *)
@@ -37,15 +38,17 @@ case `grep "kommandon" ~/.bashrc >/dev/null; echo $?` in
     ;;
 esac
 
-# check for file and write or overwrite
-if [ -f ~/.kommandon ]; then
+update() {
+  # check for file and write or overwrite
+  if [ -f ~/.kommandon ]; then
     echo "file found"
     echo "alias gam='~/bin/gamadv-xtd3/gam'" > ~/.kommandon
-else
+  else
     touch ~/.kommandon
     echo "#new file" >> ~/.kommandon
     echo "alias gam='~/bin/gamadv-xtd3/gam'" >> ~/.kommandon
-fi
+  fi
+}
 
 
 #if [ -f ~/.aliases ]; then
