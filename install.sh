@@ -48,7 +48,10 @@ update() {
     echo "#new file" >> ~/.kommandon
     echo "alias gam='~/bin/gamadv-xtd3/gam'" >> ~/.kommandon
   fi
+# perform "source"
+source ~/.kommandon
 }
+
 
 
 #if [ -f ~/.aliases ]; then
