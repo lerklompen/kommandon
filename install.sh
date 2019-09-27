@@ -23,14 +23,14 @@ echo $checkos
 
 bash_string="if [ -f ~/.kommandon ]; then\n    . ~/.kommandon\n    source ~/.kommandon\nfi"
 
-case `grep ".kommandon" ~/.bashrc >/dev/null; echo $?` in
+case `grep "kommandon" ~/.bashrc >/dev/null; echo $?` in
   0)
-    echo ".kommandon not found"
-    echo -e ${bash_string} >> ~/.bashrc
-    source ~/.bashrc
+    echo "kommandon found"
     ;;
   1)
-    echo ".kommandon found"
+    echo "kommandon not found"
+    echo -e ${bash_string} >> ~/.bashrc
+    source ~/.bashrc
     ;;
   *)
     echo "error finding .kommandon"
