@@ -40,6 +40,7 @@ bash_string="if [ -f ~/.kommandon ]; then\n    . ~/.kommandon\n    source ~/.kom
 case `grep "kommandon" ~/.bashrc >/dev/null; echo $?` in
   0)
     echo "kommandon found"
+    add_kommandon
     ;;
   1)
     echo "kommandon not found"
