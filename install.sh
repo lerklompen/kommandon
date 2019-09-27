@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-update() {
+add_kommandon()
+{
   # check for file and write or overwrite
   if [ -f ~/.kommandon ]; then
     echo "file found"
@@ -44,7 +45,7 @@ case `grep "kommandon" ~/.bashrc >/dev/null; echo $?` in
   1)
     echo "kommandon not found"
     echo -e ${bash_string} >> ~/.bashrc
-    update
+    add_kommandon
     source ~/.bashrc
     ;;
   *)
