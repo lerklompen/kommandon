@@ -12,7 +12,6 @@ add_kommandon()
     echo "alias gam='~/bin/gamadv-xtd3/gam'" >> ~/.kommandon
   fi
 # perform "source"
-source ~/.kommandon
 }
 
 usage()
@@ -46,13 +45,14 @@ case `grep "kommandon" ~/.bashrc >/dev/null; echo $?` in
     echo "kommandon not found"
     echo -e ${bash_string} >> ~/.bashrc
     add_kommandon
-    source ~/.bashrc
     ;;
   *)
     echo "error finding .kommandon"
     ;;
 esac
 
+echo "now run this command:"
+echo "source ~/.bashrc"
 
 #if [ -f ~/.aliases ]; then
 #    . ~/.aliases
