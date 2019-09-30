@@ -65,7 +65,7 @@ crosprint() {
   if [ $# -eq 0 ] ; then
     gam user admin get drivefile 1tQj_Zhb2OI0kAnQEk3xxbTOnfxBkusFBFppouqCBh7c format xlsx targetfolder ~/gam
   elif [[ $1 =~ ^(csv)$ ]] ; then
-    gam3 user admin get drivefile 1tQj_Zhb2OI0kAnQEk3xxbTOnfxBkusFBFppouqCBh7c csvsheet crosprint.csv targetfolder ~/gam targetname crosprint.csv overwrite true \
+    gam user admin get drivefile 1tQj_Zhb2OI0kAnQEk3xxbTOnfxBkusFBFppouqCBh7c csvsheet crosprint.csv targetfolder ~/gam targetname crosprint.csv overwrite true \
          && csvcut -c 3,1,2,4,5,6 ~/gam/crosprint.csv > cros.csv
   fi
 }
