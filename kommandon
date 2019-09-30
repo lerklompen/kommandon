@@ -70,6 +70,28 @@ crosprint() {
   fi
 }
 
+transfer() {
+  if [ $# -eq 0 ]; then
+    echo "example code:"
+    echo "pelle.andersson PAGY private"
+    echo "'old_user' 'OU' [private|shared|all]"
+  elif [ $# -eq 3 ]; then
+    if [[ $3 == "private" ]] ; then
+      gam create transfer $1 drive $2 private
+    elif [[ $3 == "shared" ]] ; then
+      gam create transfer $1 drive $2 shared
+    elif [[ $3 == "all" ]] ; then
+      gam create transfer $1 drive $2 all
+    else
+      echo "error, command should be: 'old_user' 'OU' [private|shared|all]"
+    fi
+  elif [[ $# -eq 1 && $1 =~ ^(show|print)$ ]] ; then
+    gam print transfers | awk -F, 'OFS="," {print $3,$4,$5,$9}'
+  else
+    echo "error, command should be: 'old_user' 'OU' [private|shared|all]"
+  fi
+}
+
 # aliases
 alias profile='nano ~/.kommandon && source ~/.kommandon'
 alias gam='~/bin/gamadv-xtd3/gam'
