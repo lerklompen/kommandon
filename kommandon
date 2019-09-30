@@ -1,4 +1,7 @@
 # aliases and commfunctions added here, this file is then "sourced" in .bashrc
+# depencies:
+# pip3 install --user --upgrade pip
+# pip3 install --user csvkit
 
 export PATH=$PATH:~/.local/bin
 
