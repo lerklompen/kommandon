@@ -5,7 +5,11 @@
 # pip3 install --user csvkit
 # for MAC also install Homebrew and then coreutils and sqlplus
 
+# csvkit (and other "pip" installations)
 export PATH=$PATH:~/.local/bin
+
+# correct encoding of output from sqlplus
+export NLS_LANG=.AL32UTF8
 
 # info and actions on ChromeOS devices
 cros() {
@@ -39,7 +43,7 @@ report() {
   if [[ $1 == "group" ]] ; then
     gam report admin user all filter "GROUP_EMAIL==${2%%@*}@skola.malmo.se" \
         | csvcut -C actor.callerType,actor.profileId,id.customerId,id.uniqueQualifier,ipAddress,type,id.applicationName \
-        | awk -F, -v green="\033[32m" -v reset="\033[0m" -v yellow="\033[43m"\
+        | awk -F, -v green="\033[32m" -v reset="\033[0m" -v yellow="\033[43m" \
         '{{printf "%s%s", yellow,$1} ; {printf "%s%s|", reset,green} ; \
         for(i=2;i<=4;i++){printf "%s%s|", green,$i} ; {printf "%s", reset} ; for(i=5;i<=NF;i++){printf "%s|", $i} ; printf "\n"}' \
         | sed -E 's/\.[[:digit:]]{3}Z\|//g'
@@ -48,11 +52,21 @@ report() {
         | csvcut -C actor.callerType,actor.profileId,id.customerId,id.uniqueQualifier,ipAddress,type,id.applicationName
   else
     gam report admin user all filter "USER_EMAIL==${1%%@*}@skola.malmo.se" \
-      | csvcut -C actor.callerType,actor.profileId,id.customerId,id.uniqueQualifier,ipAddress,type,id.applicationName,USER_EMAIL \
-      | awk -F, -v green="\033[32m" -v reset="\033[0m" -v yellow="\033[43m"\
-      '{{printf "%s%s", yellow,$1} ; {printf "%s%s|", reset,green} ; \
-      for(i=2;i<=4;i++){printf "%s%s|", green,$i} ; {printf "%s", reset} ; for(i=5;i<=NF;i++){printf "%s|", $i} ; printf "\n"}' \
-      | sed -E 's/\.[[:digit:]]{3}Z\|//g' | sed 's/\"\"\"//g' | sed -E 's/work:|work: //Ig'
+        | csvcut -C actor.callerType,actor.profileId,id.customerId,id.uniqueQualifier,ipAddress,type,id.applicationName,USER_EMAIL \
+        | awk -F, -v green="\033[32m" -v reset="\033[0m" -v yellow="\033[43m" \
+        '{{printf "%s%s", yellow,$1} ; {printf "%s%s|", reset,green} ; \
+        for(i=2;i<=4;i++){printf "%s%s|", green,$i} ; {printf "%s", reset} ; for(i=5;i<=NF;i++){printf "%s|", $i} ; printf "\n"}' \
+        | sed -E 's/\.[[:digit:]]{3}Z\|//g' | sed 's/\"\"\"//g' | sed -E 's/work:|work: //Ig'
+  fi
+}
+
+# "crosprint" for full report, "crosprint csv" for minimal csv file
+crosprint() {
+  if [ $# -eq 0 ] ; then
+    gam user admin get drivefile 1tQj_Zhb2OI0kAnQEk3xxbTOnfxBkusFBFppouqCBh7c format xlsx targetfolder ~/gam
+  elif [[ $1 =~ ^(csv)$ ]] ; then
+    gam3 user admin get drivefile 1tQj_Zhb2OI0kAnQEk3xxbTOnfxBkusFBFppouqCBh7c csvsheet crosprint.csv targetfolder ~/gam targetname crosprint.csv overwrite true \
+         && csvcut -c 3,1,2,4,5,6 ~/gam/crosprint.csv > cros.csv
   fi
 }
 
@@ -60,4 +74,5 @@ report() {
 alias profile='nano ~/.kommandon && source ~/.kommandon'
 alias gam='~/bin/gamadv-xtd3/gam'
 alias user='gam info user'
+alias group='gam info group'
 alias gamupdate='bash <(curl -s -S -L https://git.io/fhZWP) -l'
