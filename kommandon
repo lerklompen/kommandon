@@ -51,7 +51,7 @@ report() {
   fi
 }
 
-alias profile='nano ~/.aliases && source ~/.aliases'
+alias profile='nano ~/.kommandon && source ~/.kommandon'
+alias gam='~/bin/gamadv-xtd3/gam'
 alias user='gam info user'
-alias gam="/home/mattias_bystedt/bin/gamadv-xtd3/gam"
-alias gamupdate="~/./gam-install.sh -l"
+alias gamupdate='bash <(curl -s -S -L https://git.io/fhZWP) -l'
