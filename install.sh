@@ -2,15 +2,16 @@
 
 add_kommandon()
 {
+  curl https://raw.githubusercontent.com/lerklompen/kommandon/master/kommandon > ~/.kommandon
   # check for file and write or overwrite
-  if [ -f ~/.kommandon ]; then
-    echo "file found"
-    echo "alias gam='~/bin/gamadv-xtd3/gam'" > ~/.kommandon
-  else
-    touch ~/.kommandon
-    echo "#new file" >> ~/.kommandon
-    echo "alias gam='~/bin/gamadv-xtd3/gam'" >> ~/.kommandon
-  fi
+  #if [ -f ~/.kommandon ]; then
+    #echo "file found"
+    #echo "alias gam='~/bin/gamadv-xtd3/gam'" > ~/.kommandon
+  #else
+    #touch ~/.kommandon
+    #echo "#new file" >> ~/.kommandon
+    #echo "alias gam='~/bin/gamadv-xtd3/gam'" >> ~/.kommandon
+  #fi
 # perform "source"
 }
 
