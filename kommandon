@@ -1,0 +1,57 @@
+# aliases and commfunctions added here, this file is then "sourced" in .bashrc
+
+export PATH=$PATH:~/.local/bin
+
+# info and actions on ChromeOS devices
+cros() {
+if [[ ($# -eq 2) ]] ; then
+  if [[ $2 =~ ^(users|recent)$ ]] ; then
+    gam info cros query id:"$1" fields "deviceid,org,serialnumber,status,model,osversion,lastsync,recentusers,macaddress"
+  else
+    if [[ $2 == *"/"* ]] ; then
+      gam update cros query id:${1} org ${2}
+    elif [[ $2 == *"GR"* ]] ; then
+      gam update cros query id:${1} org /171/Elev/${2}
+    elif [[ $2 == *"GY"* ]] ; then
+      gam update cros query id:${1} org /170/Elev/${2}
+    elif [[ $2 == *"KV"* ]] ; then
+      gam update cros query id:${1} org /170/Elev/${2}
+    elif [[ $2 =~ ^(enable|reenable)$ ]] ; then
+      gam update cros query id:${1} action reenable
+    elif [[ $2 =~ ^(disable)$ ]] ; then
+      gam update cros query id:${1} action disable
+    else
+      echo "unknown org or command"
+    fi
+  fi
+else
+    gam info cros query id:"$1" fields "deviceid,org,serialnumber,status,model,osversion,lastsync,macaddress"
+fi
+}
+
+# Searches in google "system log"
+report() {
+  if [[ $1 == "group" ]] ; then
+    gam report admin user all filter "GROUP_EMAIL==${2%%@*}@skola.malmo.se" \
+        | csvcut -C actor.callerType,actor.profileId,id.customerId,id.uniqueQualifier,ipAddress,type,id.applicationName \
+        | awk -F, -v green="\033[32m" -v reset="\033[0m" -v yellow="\033[43m"\
+        '{{printf "%s%s", yellow,$1} ; {printf "%s%s|", reset,green} ; \
+        for(i=2;i<=4;i++){printf "%s%s|", green,$i} ; {printf "%s", reset} ; for(i=5;i<=NF;i++){printf "%s|", $i} ; printf "\n"}' \
+        | sed -E 's/\.[[:digit:]]{3}Z\|//g'
+  elif [[ $1 == "full" ]] ; then
+    gam report admin user all filter "USER_EMAIL==${2%%@*}@skola.malmo.se" \
+        | csvcut -C actor.callerType,actor.profileId,id.customerId,id.uniqueQualifier,ipAddress,type,id.applicationName
+  else
+    gam report admin user all filter "USER_EMAIL==${1%%@*}@skola.malmo.se" \
+      | csvcut -C actor.callerType,actor.profileId,id.customerId,id.uniqueQualifier,ipAddress,type,id.applicationName,USER_EMAIL \
+      | awk -F, -v green="\033[32m" -v reset="\033[0m" -v yellow="\033[43m"\
+      '{{printf "%s%s", yellow,$1} ; {printf "%s%s|", reset,green} ; \
+      for(i=2;i<=4;i++){printf "%s%s|", green,$i} ; {printf "%s", reset} ; for(i=5;i<=NF;i++){printf "%s|", $i} ; printf "\n"}' \
+      | sed -E 's/\.[[:digit:]]{3}Z\|//g' | sed 's/\"\"\"//g' | sed -E 's/work:|work: //Ig'
+  fi
+}
+
+alias profile='nano ~/.aliases && source ~/.aliases'
+alias user='gam info user'
+alias gam="/home/mattias_bystedt/bin/gamadv-xtd3/gam"
+alias gamupdate="~/./gam-install.sh -l"
