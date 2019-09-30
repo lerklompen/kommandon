@@ -76,15 +76,26 @@ transfer() {
     echo "pelle.andersson PAGY private"
     echo "'old_user' 'OU' [private|shared|all]"
   elif [ $# -eq 3 ]; then
+    gam_command="gam create transfer ${1} drive ${2}"
+    privacy_level='unset'
     if [[ $3 == "private" ]] ; then
-      gam create transfer $1 drive $2 private
+      privacy_level='private'
     elif [[ $3 == "shared" ]] ; then
-      gam create transfer $1 drive $2 shared
+      privacy_level='shared'
     elif [[ $3 == "all" ]] ; then
-      gam create transfer $1 drive $2 all
+      privacy_level='all'
     else
       echo "error, command should be: 'old_user' 'OU' [private|shared|all]"
     fi
+    # ask for confirmation
+    echo -n "Run command: '${gam_command} ${privacy_level}'\n(y/n)? "
+    read answer
+    if [ "$answer" != "${answer#[Yy]}" ] ;then
+      ${gam_command} ${privacy_level}
+    else
+      echo No
+    fi
+    #gam create transfer $1 drive $2 ${privacy_level}
   elif [[ $# -eq 1 && $1 =~ ^(show|print)$ ]] ; then
     gam print transfers | awk -F, 'OFS="," {print $3,$4,$5,$9}'
   else
