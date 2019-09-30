@@ -88,10 +88,10 @@ transfer() {
       echo "error, command should be: 'old_user' 'OU' [private|shared|all]"
     fi
     # ask for confirmation
-    echo -n "Run command: '${gam_command} ${privacy_level}'\n(y/n)? "
+    echo -e "Run command: '${gam_command} ${privacy_level}'\n(y/n)? "
     read answer
     if [ "$answer" != "${answer#[Yy]}" ] ;then
-      ${gam_command} ${privacy_level}
+      gam create transfer $1 drive $2 ${privacy_level}
     else
       echo No
     fi
