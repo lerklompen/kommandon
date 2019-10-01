@@ -1,7 +1,7 @@
 # aliases and commfunctions added here, this file is then "sourced" in .bashrc
 # depencies:
 # GAMADV-xtd3
-# pip3 install --user --upgrade pip
+# (pip3 install --user --upgrade pip) - stay updated!
 # pip3 install --user csvkit
 # for MAC also install Homebrew and then coreutils and sqlplus
 
