@@ -73,10 +73,10 @@ crosprint() {
 transfer() {
   if [ $# -eq 0 ]; then
     echo "example code:"
-    echo "pelle.andersson PAGY private"
-    echo "'old_user' 'OU' [private|shared|all]"
+    echo "transfer pelle.andersson PAGY private"
+    echo "transfer 'old_user' 'OU' [private|shared|all]"
   elif [ $# -eq 3 ]; then
-    gam_command="gam create transfer ${1} drive ${2}"
+    gam_command="gam create transfer ${1} drive"
     privacy_level='unset'
     if [[ $3 == "private" ]] ; then
       privacy_level='private'
@@ -86,16 +86,19 @@ transfer() {
       privacy_level='all'
     else
       echo "error, command should be: 'old_user' 'OU' [private|shared|all]"
+      return
     fi
+
     # ask for confirmation
-    echo -e "Run command: '${gam_command} ${privacy_level}'\n(y/n)? "
+    echo -ne "Transfer ${privacy_level} files from ${1} to ${2}?\n(y/n)?"
     read answer
     if [ "$answer" != "${answer#[Yy]}" ] ;then
-      gam create transfer $1 drive $2 ${privacy_level}
+      gam create transfer $1 drive $2 ${privacy_level} &&\
+      echo "use 'transfer show' to see latest transfers"
     else
       echo No
     fi
-    #gam create transfer $1 drive $2 ${privacy_level}
+
   elif [[ $# -eq 1 && $1 =~ ^(show|print)$ ]] ; then
     gam print transfers | awk -F, 'OFS="," {print $3,$4,$5,$9}'
   else
