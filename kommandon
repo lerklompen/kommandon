@@ -106,6 +106,10 @@ transfer() {
   fi
 }
 
+undelete() {
+  gam undelete user $1 org /TEMP
+}
+
 # aliases
 alias profile='nano ~/.kommandon && source ~/.kommandon'
 alias gam='~/bin/gamadv-xtd3/gam'
