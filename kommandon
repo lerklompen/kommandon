@@ -11,6 +11,8 @@ export PATH=$PATH:~/.local/bin
 # correct encoding of output from sqlplus
 export NLS_LANG=.AL32UTF8
 
+ad_conf='ldaps://ldap_url:636'
+
 # info and actions on ChromeOS devices
 cros() {
 if [[ ($# -eq 2) ]] ; then
