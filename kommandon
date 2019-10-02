@@ -118,3 +118,7 @@ alias group='gam info group'
 alias gamupdate='bash <(curl -s -S -L https://git.io/fhZWP) -l'
 alias kommandoupdate='bash <(curl -s -S -L https://git.io/Jesrp)'
 alias updatekommando='bash <(curl -s -S -L https://git.io/Jesrp)'
+#alias ldap='ldapsearch -LLL -o ldif-wrap=no -H ldaps://srvwindcintra03.intra.malmo.se:636 -b "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=matsve4,OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=s$
+alias pnr='~/gam/./sql.sh pnr'
+alias anv='~/gam/./sql.sh anv'
+alias spec='~/gam/./sql.sh spec'
