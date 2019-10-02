@@ -110,6 +110,48 @@ undelete() {
   gam undelete user $1 org /TEMP
 }
 
+AD() {
+  if [[ $1 == "name" ]] ; then
+    ldapsearch -LLL -o ldif-wrap=no -H $ad_conf -b \
+      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=matsve4,OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
+      -y ~/gam/.pass.txt "(&(displayName=${2}* ${3}*))" \
+      cn otherMailbox mail displayName department memberOf title physicalDeliveryOfficeName telephoneNumber company \
+      adminDescription streetAddress division roomNumber manager mobile departmentNumber \
+       > ~/gam/ldap_out.txt  && while read l ; do a=$(echo $l | awk '{print $1}') && b=$(echo $l | awk '{print $2}') && \
+      if [[ $a == *"::" ]] ; then d=$(echo $b | base64 --decode) &&  c=$(echo "${a:0:-1} $d") && echo $c ; else echo $l ; fi ; done \
+      < ~/gam/ldap_out.txt | tee >(grep memberOf | gegrep "17[01]G|SchoolEmployees|EDU_Students" > ~/gam/memberOf.txt) | grep -v memberOf && cat ~/gam/memberOf.txt
+  elif [[ $1 =~ ^(mail|email)$ ]] ; then
+    ldapsearch -LLL -o ldif-wrap=no -H $ad_conf -b \
+      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=matsve4,OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
+      -y ~/gam/.pass.txt "(&(mail=${2}*))" \
+      cn otherMailbox mail displayName department memberOf title physicalDeliveryOfficeName telephoneNumber company \
+      adminDescription streetAddress division roomNumber manager mobile departmentNumber \
+       > ~/gam/ldap_out.txt  && while read l ; do a=$(echo $l | awk '{print $1}') && b=$(echo $l | awk '{print $2}') && \
+      if [[ $a == *"::" ]] ; then d=$(echo $b | base64 --decode) &&  c=$(echo "${a:0:-1} $d") && echo $c ; else echo $l ; fi ; done \
+      < ~/gam/ldap_out.txt | tee >(grep memberOf | gegrep "17[01]G|SchoolEmployees|EDU_Students" > ~/gam/memberOf.txt) | grep -v memberOf && cat ~/gam/memberOf.txt
+  elif [[ $1 =~ ^(mail_and_groups|email_and_groups)$ ]] ; then
+    ldapsearch -LLL -o ldif-wrap=no -H $ad_conf -b \
+      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=matsve4,OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
+      -y ~/gam/.pass.txt "(&(mail=${2}*))" \
+      cn otherMailbox mail displayName department memberOf title physicalDeliveryOfficeName telephoneNumber company \
+      adminDescription streetAddress division roomNumber manager mobile departmentNumber \
+       > ~/gam/ldap_out.txt  && while read l ; do a=$(echo $l | awk '{print $1}') && b=$(echo $l | awk '{print $2}') && \
+      if [[ $a == *"::" ]] ; then d=$(echo $b | base64 --decode) &&  c=$(echo "${a:0:-1} $d") && echo $c ; else echo $l ; fi ; done \
+      < ~/gam/ldap_out.txt
+  elif [[ $1 =~ ^(cn|CN)$ ]] ; then
+    ldapsearch -LLL -o ldif-wrap=no -H $ad_conf -b \
+      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=matsve4,OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
+      -y ~/gam/.pass.txt "(&(CN=${2}*))" \
+      cn otherMailbox mail displayName department memberOf title physicalDeliveryOfficeName telephoneNumber company \
+      adminDescription streetAddress division roomNumber manager mobile departmentNumber \
+       > ~/gam/ldap_out.txt  && while read l ; do a=$(echo $l | awk '{print $1}') && b=$(echo $l | awk '{print $2}') && \
+      if [[ $a == *"::" ]] ; then d=$(echo $b | base64 --decode) &&  c=$(echo "${a:0:-1} $d") && echo $c ; else echo $l ; fi ; done \
+      < ~/gam/ldap_out.txt | tee >(grep memberOf | gegrep "17[01]G|SchoolEmployees|EDU_Students" > ~/gam/memberOf.txt) | grep -v memberOf && cat ~/gam/memberOf.txt
+  else
+    echo "unknown command"
+  fi
+}
+
 # aliases
 alias profile='nano ~/.kommandon && source ~/.kommandon'
 alias gam='~/bin/gamadv-xtd3/gam'
@@ -118,7 +160,7 @@ alias group='gam info group'
 alias gamupdate='bash <(curl -s -S -L https://git.io/fhZWP) -l'
 alias kommandoupdate='bash <(curl -s -S -L https://git.io/Jesrp)'
 alias updatekommando='bash <(curl -s -S -L https://git.io/Jesrp)'
-#alias ldap='ldapsearch -LLL -o ldif-wrap=no -H ldaps://srvwindcintra03.intra.malmo.se:636 -b "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=matsve4,OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=s$
+alias unsuspend='gam unsuspend user'
 alias pnr='~/gam/./sql.sh pnr'
 alias anv='~/gam/./sql.sh anv'
 alias spec='~/gam/./sql.sh spec'
