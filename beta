@@ -1,6 +1,6 @@
 #!/usr/bin/env
 
-check=$(/usr/bin/env | grep "SHELL")
+check=$(/usr/bin/env | grep -e "^SHELL=")
 echo "this is the system shell: ${check}"
 
 usage()
@@ -9,7 +9,6 @@ cat << EOF
 ----
 KOMMANDON installation script.
 ----
-Installs usefull commands, you can also use this to upgrade whenever new commands are added.
 EOF
 }
 
