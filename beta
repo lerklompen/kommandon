@@ -22,12 +22,16 @@ echo $checkos
 
 
 # TODO - mac: ".bash_profile" Linux: ".bashrc"
+bash_file="~/.bashrc"
+if [ checkos == "DARWIN" ]; then
+  bash_file="~/.bash_profile"
+fi
 
 bash_string="if [ -f ~/.kommandon ]; then\n    . ~/.kommandon\n    source ~/.kommandon\nfi"
 
 
 echo "now run this command:"
-echo "source ~/.bashrc"
+echo "source ${bash_file}"
 
 #if [ -f ~/.aliases ]; then
 #    . ~/.aliases
