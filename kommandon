@@ -12,6 +12,7 @@ export PATH=$PATH:~/.local/bin
 export NLS_LANG=.AL32UTF8
 
 ad_conf='ldaps://ldap_url:636'
+ad_user='userid'
 
 # info and actions on ChromeOS devices
 cros() {
@@ -58,7 +59,7 @@ report() {
         | awk -F, -v green="\033[32m" -v reset="\033[0m" -v yellow="\033[43m" \
         '{{printf "%s%s", yellow,$1} ; {printf "%s%s|", reset,green} ; \
         for(i=2;i<=4;i++){printf "%s%s|", green,$i} ; {printf "%s", reset} ; for(i=5;i<=NF;i++){printf "%s|", $i} ; printf "\n"}' \
-        | sed -E 's/\.[[:digit:]]{3}Z\|//g' | sed 's/\"\"\"//g' | sed -E 's/work:|work: //Ig'
+        | sed -E 's/\.[[:digit:]]{3}Z\|//g' | sed 's/\"\"\"//g' | gsed -E 's/work:|work: //Ig'
   fi
 }
 
@@ -115,7 +116,7 @@ undelete() {
 AD() {
   if [[ $1 == "name" ]] ; then
     ldapsearch -LLL -o ldif-wrap=no -H $ad_conf -b \
-      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=matsve4,OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
+      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=${ad_user},OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
       -y ~/gam/.pass.txt "(&(displayName=${2}* ${3}*))" \
       cn otherMailbox mail displayName department memberOf title physicalDeliveryOfficeName telephoneNumber company \
       adminDescription streetAddress division roomNumber manager mobile departmentNumber \
@@ -124,7 +125,7 @@ AD() {
       < ~/gam/ldap_out.txt | tee >(grep memberOf | gegrep "17[01]G|SchoolEmployees|EDU_Students" > ~/gam/memberOf.txt) | grep -v memberOf && cat ~/gam/memberOf.txt
   elif [[ $1 =~ ^(mail|email)$ ]] ; then
     ldapsearch -LLL -o ldif-wrap=no -H $ad_conf -b \
-      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=matsve4,OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
+      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=${ad_user},OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
       -y ~/gam/.pass.txt "(&(mail=${2}*))" \
       cn otherMailbox mail displayName department memberOf title physicalDeliveryOfficeName telephoneNumber company \
       adminDescription streetAddress division roomNumber manager mobile departmentNumber \
@@ -133,7 +134,7 @@ AD() {
       < ~/gam/ldap_out.txt | tee >(grep memberOf | gegrep "17[01]G|SchoolEmployees|EDU_Students" > ~/gam/memberOf.txt) | grep -v memberOf && cat ~/gam/memberOf.txt
   elif [[ $1 =~ ^(mail_and_groups|email_and_groups)$ ]] ; then
     ldapsearch -LLL -o ldif-wrap=no -H $ad_conf -b \
-      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=matsve4,OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
+      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=${ad_user},OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
       -y ~/gam/.pass.txt "(&(mail=${2}*))" \
       cn otherMailbox mail displayName department memberOf title physicalDeliveryOfficeName telephoneNumber company \
       adminDescription streetAddress division roomNumber manager mobile departmentNumber \
@@ -142,7 +143,7 @@ AD() {
       < ~/gam/ldap_out.txt
   elif [[ $1 =~ ^(cn|CN)$ ]] ; then
     ldapsearch -LLL -o ldif-wrap=no -H $ad_conf -b \
-      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=matsve4,OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
+      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=${ad_user},OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
       -y ~/gam/.pass.txt "(&(CN=${2}*))" \
       cn otherMailbox mail displayName department memberOf title physicalDeliveryOfficeName telephoneNumber company \
       adminDescription streetAddress division roomNumber manager mobile departmentNumber \
