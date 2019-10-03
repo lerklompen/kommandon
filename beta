@@ -1,6 +1,7 @@
-#!/usr/bin/env $0
+#!/usr/bin/env
 
-echo "this is the system shell: ${0}"
+check=$(/usr/bin/env | grep "SHELL")
+echo "this is the system shell: ${check}"
 
 usage()
 {
