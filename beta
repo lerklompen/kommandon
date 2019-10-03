@@ -1,0 +1,34 @@
+#!/usr/bin/env $0
+
+echo "this is the system shell: ${0}"
+
+usage()
+{
+cat << EOF
+----
+KOMMANDON installation script.
+----
+Installs usefull commands, you can also use this to upgrade whenever new commands are added.
+EOF
+}
+
+usage
+
+checkarch=$(uname -m)
+checkos=$(uname -s)
+echo $checkarch
+echo $checkos
+
+
+# TODO - mac: ".bash_profile" Linux: ".bashrc"
+
+bash_string="if [ -f ~/.kommandon ]; then\n    . ~/.kommandon\n    source ~/.kommandon\nfi"
+
+
+echo "now run this command:"
+echo "source ~/.bashrc"
+
+#if [ -f ~/.aliases ]; then
+#    . ~/.aliases
+#    source ~/.aliases
+#fi
