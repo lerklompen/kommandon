@@ -23,7 +23,7 @@ echo $checkos
 
 # TODO - mac: ".bash_profile" Linux: ".bashrc"
 bash_file="~/.bashrc"
-if [ checkos == "DARWIN" ]; then
+if [ checkos = "DARWIN" ]; then
   bash_file="~/.bash_profile"
 fi
 
