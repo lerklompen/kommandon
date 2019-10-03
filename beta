@@ -1,7 +1,7 @@
 #!/usr/bin/env
 
 check=$(/usr/bin/env | grep -e "^SHELL=")
-check=$(awk -F"/" '{print $NF}')
+check=$(echo $check | awk -F"/" '{print $NF}')
 echo "this is the system shell: ${check}"
 
 usage()
