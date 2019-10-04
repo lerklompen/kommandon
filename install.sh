@@ -45,7 +45,7 @@ if [ ! -f ~/gam/.ad_user ]; then
   touch ~/gam/.ad_user
   echo -n "ad_user=${ad_user}" > ~/gam/.ad_user
   if [ ! -f ~/gam/.pass.txt ]; then
-    nano ~/password.txt && cat ~/password.txt | tr -d "\n" > ~/gam/.pass.txt && rm ~/password.txt && chmod 600 ~/gam/.pass.txt
+    echo "You must now also run the command 'AD_password' to be able to use the 'AD'-commands"
   fi
 fi
 if [ ! -f ~/gam/.ad_conf ]; then
