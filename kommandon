@@ -12,7 +12,7 @@ export PATH=$PATH:~/.local/bin
 export NLS_LANG=.AL32UTF8
 
 ad_conf='ldaps://ldap_url:636'
-ad_user='userid'
+ad_user='_userid_'
 
 # info and actions on ChromeOS devices
 cros() {
