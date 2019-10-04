@@ -14,6 +14,7 @@ export NLS_LANG=.AL32UTF8
 ad_conf='ldaps://_ldapurl_:636'
 ad_user='_userid_'
 
+##### GAM functions
 # info and actions on ChromeOS devices
 cros() {
 if [[ ($# -eq 2) ]] ; then
@@ -113,6 +114,7 @@ undelete() {
   gam undelete user $1 org /TEMP
 }
 
+##### AD functions
 AD() {
   if [[ $1 == "name" ]] ; then
     ldapsearch -LLL -o ldif-wrap=no -H $ad_conf -b \
@@ -158,13 +160,19 @@ AD() {
 # aliases
 alias profile='nano ~/.kommandon && source ~/.kommandon'
 alias gam='~/bin/gamadv-xtd3/gam'
+alias kommandoupdate='bash <(curl -s -S -L https://git.io/Jesrp)'
+alias updatekommando='bash <(curl -s -S -L https://git.io/Jesrp)'
+
+### GAM
 alias user='gam info user'
 alias group='gam info group'
 alias gamupdate='bash <(curl -s -S -L https://git.io/fhZWP) -l'
-alias kommandoupdate='bash <(curl -s -S -L https://git.io/Jesrp)'
-alias updatekommando='bash <(curl -s -S -L https://git.io/Jesrp)'
 alias unsuspend='gam unsuspend user'
+
+### EXTENS
 alias pnr='~/gam/./sql.sh pnr'
 alias anv='~/gam/./sql.sh anv'
 alias spec='~/gam/./sql.sh spec'
+
+# only used to set or update your AD password
 alias AD_password='nano ~/password.txt && cat ~/password.txt | tr -d "\n" > ~/gam/.pass.txt && rm ~/password.txt && chmod 600 ~/gam/.pass.txt'
