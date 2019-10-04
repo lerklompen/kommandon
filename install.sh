@@ -1,4 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env
+
+checkarch=$(uname -m)
+checkos=$(uname -s)
+echo $checkarch
+echo $checkos
 
 add_kommandon()
 {
@@ -15,24 +20,18 @@ usage()
 {
 cat << EOF
 ----
-KOMMANDON installation script.
+KOMMANDON installation script running...
 ----
-
-Installs usefull commands, you can also use this to upgrade whenever new commands are added.
 
 EOF
 }
 
 usage
 
-checkarch=$(uname -m)
-checkos=$(uname -s)
-echo $checkarch
-echo $checkos
-
-# TODO - mac: ".bash_profile" Linux: ".bashrc"
+# TODO - Mac: ".bash_profile" Linux: ".bashrc"
 
 bash_string="if [ -f ~/.kommandon ]; then\n    . ~/.kommandon\n    source ~/.kommandon\nfi"
+profile_string="source ~/.bashrc"
 
 case `grep "kommandon" ~/.bashrc >/dev/null; echo $?` in
   0)
@@ -42,6 +41,8 @@ case `grep "kommandon" ~/.bashrc >/dev/null; echo $?` in
   1)
     echo "kommandon not found"
     echo -e ${bash_string} >> ~/.bashrc
+    touch ~/.bash_profile
+    echo -e ${profile_string} >> ~/.bash_profile
     add_kommandon
     ;;
   *)
@@ -49,12 +50,8 @@ case `grep "kommandon" ~/.bashrc >/dev/null; echo $?` in
     ;;
 esac
 
-echo "now run this command:"
-echo "source ~/.bashrc"
+echo "Now type 'exit' and restart terminal"
 
-#if [ -f ~/.aliases ]; then
-#    . ~/.aliases
-#    source ~/.aliases
-#fi
+
 
 
