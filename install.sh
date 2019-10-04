@@ -8,7 +8,7 @@ add_kommandon()
 {
   curl https://raw.githubusercontent.com/lerklompen/kommandon/master/kommandon > ~/.kommandon
   source ~/gam/.ad_user
-  if [ checkos = "Darwin" ]; then
+  if [ "$checkos" == "Darwin" ]; then
     echo "using 'gsed'..."
     gsed -i "s/_userid_/$ad_user/g" ~/.kommandon
   else
@@ -59,7 +59,7 @@ case `grep "kommandon" ~/.bashrc >/dev/null; echo $?` in
   1)
     echo "kommandon not found"
     echo -e ${bash_string} >> ~/.bashrc
-    if [ checkos = "DARWIN" ]; then
+    if [ "$checkos" = ""Darwin"" ]; then
       touch ~/.bash_profile
       echo -e ${profile_string} >> ~/.bash_profile
     fi
