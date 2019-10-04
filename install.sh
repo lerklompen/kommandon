@@ -18,6 +18,7 @@ add_kommandon()
     echo "using 'sed'..."
     sed -i "s/_userid_/$ad_user/g" ~/.kommandon
     sed -i "s/_ldapurl_/$ad_conf/g" ~/.kommandon
+    sed -i "s/ gsed / sed /g" ~/.kommandon
   fi
   # check for dir "gam"
   if [ -d ~/gam ]; then
