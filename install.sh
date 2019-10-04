@@ -8,10 +8,11 @@ add_kommandon()
 {
   curl https://raw.githubusercontent.com/lerklompen/kommandon/master/kommandon > ~/.kommandon
   source ~/gam/.ad_user
-  if [ checkos = "DARWIN" ]; then
+  if [ checkos = "Darwin" ]; then
     echo "using 'gsed'..."
     gsed -i "s/_userid_/$ad_user/g" ~/.kommandon
   else
+    echo "using 'sed'..."
     sed -i "s/_userid_/$ad_user/g" ~/.kommandon
   fi
   # check for dir "gam"
