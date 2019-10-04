@@ -4,17 +4,16 @@ checkos=$(uname -s)
 uname -a
 echo $checkos
 
-if [ checkos = "DARWIN" ]; then
-  sed="gsed"
-else
-  sed="sed"
-fi
-
 add_kommandon()
 {
   curl https://raw.githubusercontent.com/lerklompen/kommandon/master/kommandon > ~/.kommandon
   source ~/gam/.ad_user
-  gsed -i "s/_userid_/$ad_user/g" ~/.kommandon
+  if [ checkos = "DARWIN" ]; then
+    echo "using 'gsed'..."
+    gsed -i "s/_userid_/$ad_user/g" ~/.kommandon
+  else
+    sed -i "s/_userid_/$ad_user/g" ~/.kommandon
+  fi
   # check for dir "gam"
   if [ -d ~/gam ]; then
     echo "dir 'gam' found"
