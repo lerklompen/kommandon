@@ -11,7 +11,7 @@ export PATH=$PATH:~/.local/bin
 # correct encoding of output from sqlplus
 export NLS_LANG=.AL32UTF8
 
-ad_conf='ldaps://ldap_url:636'
+ad_conf='ldaps://_ldapurl_:636'
 ad_user='_userid_'
 
 # info and actions on ChromeOS devices
