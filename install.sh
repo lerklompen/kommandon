@@ -47,12 +47,12 @@ if [ ! -f ~/gam/.ad_user ]; then
   if [ ! -f ~/gam/.pass.txt ]; then
     nano ~/password.txt && cat ~/password.txt | tr -d "\n" > ~/gam/.pass.txt && rm ~/password.txt && chmod 600 ~/gam/.pass.txt
   fi
-  if [ ! -f ~/gam/.ad_conf ]; then
-    echo -ne "Please write your AD url and press ENTER:"
-    read ad_conf
-    touch ~/gam/.ad_conf
-    echo -n "ad_conf=${ad_conf}" > ~/gam/.ad_conf
-  fi
+fi
+if [ ! -f ~/gam/.ad_conf ]; then
+  echo -ne "Please write your AD url and press ENTER:"
+  read ad_conf
+  touch ~/gam/.ad_conf
+  echo -n "ad_conf=${ad_conf}" > ~/gam/.ad_conf
 fi
 
 # TODO - Mac: ".bash_profile" Linux: ".bashrc"
