@@ -14,7 +14,7 @@ add_kommandon()
 {
   curl https://raw.githubusercontent.com/lerklompen/kommandon/master/kommandon > ~/.kommandon
   source ~/gam/.ad_user
-  $sed -i "s/_userid_/$ad_user/g" ~/.kommandon
+  gsed -i "s/_userid_/$ad_user/g" ~/.kommandon
   # check for dir "gam"
   if [ -d ~/gam ]; then
     echo "dir 'gam' found"
