@@ -8,12 +8,15 @@ add_kommandon()
 {
   curl https://raw.githubusercontent.com/lerklompen/kommandon/master/kommandon > ~/.kommandon
   source ~/gam/.ad_user
+  source ~/gam/.ad_conf
   if [ "$checkos" == "Darwin" ]; then
     echo "using 'gsed'..."
     gsed -i "s/_userid_/$ad_user/g" ~/.kommandon
+    gsed -i "s/_ldapurl_/$ad_conf/g" ~/.kommandon
   else
     echo "using 'sed'..."
     sed -i "s/_userid_/$ad_user/g" ~/.kommandon
+    sed -i "s/_ldapurl_/$ad_conf/g" ~/.kommandon
   fi
   # check for dir "gam"
   if [ -d ~/gam ]; then
@@ -43,6 +46,12 @@ if [ ! -f ~/gam/.ad_user ]; then
   echo -n "ad_user=${ad_user}" > ~/gam/.ad_user
   if [ ! -f ~/gam/.pass.txt ]; then
     nano ~/password.txt && cat ~/password.txt | tr -d "\n" > ~/gam/.pass.txt && rm ~/password.txt && chmod 600 ~/gam/.pass.txt
+  fi
+  if [ ! -f ~/gam/.ad_conf ]; then
+    echo -ne "Please write your AD url and press ENTER:"
+    read ad_conf
+    touch ~/gam/.ad_conf
+    echo -n "ad_conf=${ad_conf}" > ~/gam/.ad_conf
   fi
 fi
 
