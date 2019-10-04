@@ -1,8 +1,7 @@
 #!/usr/bin/env
 
-checkarch=$(uname -m)
 checkos=$(uname -s)
-echo $checkarch
+uname -a
 echo $checkos
 
 add_kommandon()
@@ -41,8 +40,10 @@ case `grep "kommandon" ~/.bashrc >/dev/null; echo $?` in
   1)
     echo "kommandon not found"
     echo -e ${bash_string} >> ~/.bashrc
-    touch ~/.bash_profile
-    echo -e ${profile_string} >> ~/.bash_profile
+    if [ checkos = "DARWIN" ]; then
+      touch ~/.bash_profile
+      echo -e ${profile_string} >> ~/.bash_profile
+    fi
     add_kommandon
     ;;
   *)
