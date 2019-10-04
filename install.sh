@@ -4,6 +4,7 @@ checkos=$(uname -s)
 uname -a
 echo $checkos
 
+# install or update new commands
 add_kommandon()
 {
   curl https://raw.githubusercontent.com/lerklompen/kommandon/master/kommandon > ~/.kommandon
@@ -26,6 +27,7 @@ add_kommandon()
   fi
 }
 
+# message during install
 usage()
 {
 cat << EOF
@@ -55,18 +57,16 @@ if [ ! -f ~/gam/.ad_conf ]; then
   echo -n "ad_conf=${ad_conf}" > ~/gam/.ad_conf
 fi
 
-# TODO - Mac: ".bash_profile" Linux: ".bashrc"
-
 bash_string="if [ -f ~/.kommandon ]; then\n    . ~/.kommandon\n    source ~/.kommandon\nfi"
 profile_string="source ~/.bashrc"
 
 case `grep "kommandon" ~/.bashrc >/dev/null; echo $?` in
   0)
-    echo "kommandon found"
+    echo "KOMMANDON found - updating with new commands"
     add_kommandon
     ;;
   1)
-    echo "kommandon not found"
+    echo "KOMMANDON not found - first install"
     echo -e ${bash_string} >> ~/.bashrc
     if [ "$checkos" = ""Darwin"" ]; then
       touch ~/.bash_profile
