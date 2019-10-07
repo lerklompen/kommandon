@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 checkos=$(uname -s)
-uname -a
 echo $checkos
 
 # install or update new commands
@@ -58,9 +57,9 @@ if [ ! -f ~/gam/.ad_conf ]; then
   echo -n "ad_conf=${ad_conf}" > ~/gam/.ad_conf
 fi
 
+# check install or update
 bash_string="if [ -f ~/.kommandon ]; then\n    . ~/.kommandon\n    source ~/.kommandon\nfi"
 profile_string="source ~/.bashrc"
-
 case `grep "kommandon" ~/.bashrc >/dev/null; echo $?` in
   0)
     echo "KOMMANDON found - updating with new commands"
