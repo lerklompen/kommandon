@@ -130,6 +130,7 @@ classroom() {
     gam redirect csv "$WORK_DIR"/tmp1 columndelimiter "|" print courses teacher $1 fields "id,name,coursestate,descriptionheading,section,ownerid"
     cat "$WORK_DIR"/tmp1 | tail -n +2 | awk -v id="id:" -F"|" '{print id$6}' | sort | uniq > "$WORK_DIR"/tmp2
     gam print users select file "$WORK_DIR"/tmp2 fields "id" | tail -n +2 > "$WORK_DIR"/tmp3
+    echo ""
     while read r ; do id=$(echo $r | awk -F, '{print $2}') && owner=$(echo $r | awk -F, '{print $1}') && gsed -i "s/${id}/${owner}/g" "$WORK_DIR"/tmp1 ; done < "$WORK_DIR"/tmp3
     mv "$WORK_DIR"/tmp1 ~/gam/${1}
     cat ~/gam/${1}
