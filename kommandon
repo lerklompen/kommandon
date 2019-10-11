@@ -95,7 +95,8 @@ transfer() {
     fi
 
     # ask for confirmation
-    echo -ne "Transfer ${privacy_level} files from ${1} to ${2}?\n(y/n)?"
+    echo "Transfer ${privacy_level} files from ${1} to ${2}?"
+    echo -ne "(y/n)?"
     read answer
     if [ "$answer" != "${answer#[Yy]}" ] ;then
       gam create transfer $1 drive $2 ${privacy_level} &&\
