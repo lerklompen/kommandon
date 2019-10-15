@@ -42,6 +42,36 @@ else
 fi
 }
 
+crosbatch() {
+  if test `find "~/gam/cros.csv" -mmin +600` ; then
+    echo "Downloading fresh csv report:"
+    crosprint "csv"
+  fi
+  echo "\n----Comparing----"
+  sort "$1" | uniq > tmpcros
+  mv tmpcros "$1"
+  input=$(wc -l "$1"  | awk '{ print $1 }')
+  #head -n 1 cros.csv > cros_found.csv
+  ggrep -if "$1" cros.csv > cros_found.csv
+  output=$(wc -l cros_found.csv  | awk '{ print $1 }')
+  ggrep -if "$1" cros.csv -o -h | grep -if /dev/stdin -v $1 > cros_notfound.txt
+  notfound=$(wc -l cros_notfound.txt  | awk '{ print $1 }')
+  echo "Inputfile: ${input}\nFound: ${output}"
+  if [ $notfound -ne 0 ] ; then
+    echo "Did not find:"
+    cat cros_notfound.txt
+  fi
+  cat cros_found.csv | awk -F, '{print $2}' > crosfile.txt
+  head -n 1 cros.csv > tmpcros
+  cat cros_found.csv >> tmpcros
+  mv tmpcros cros_found.csv
+  echo "----Results----\nList of deviceIds in file:\n  crosfile.txt"
+  echo "Complete results in file:\n  cros_found.csv"
+  echo "To move all devices (be careful and check the results first):\ngam crosfile crosfile.txt update org /17[0|1]/Elev/[ORGUNIT]"
+  echo "To check devices after moving:\ngam crosfile crosfile.txt info fields ou"
+}
+
+
 # Search the "audit log"
 report() {
   if [[ $1 == "group" ]] ; then
