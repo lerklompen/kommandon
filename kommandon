@@ -43,37 +43,77 @@ fi
 }
 
 crosbatch() {
-  if [ ! -f ~/gam/cros.csv ]; then
-    crosprint "csv"
+  # check if file with extension is given as argument
+  if [[ $1 == *"."* ]] ; then
+    # check if file actually exists
+    if [ ! -f ~/gam/${1} ]; then
+      echo -e "No such file found:\n$1"
+      return
+    fi
+    # check for cros.csv
+    if [ ! -f $HOME/gam/cros.csv ]; then
+      echo "Did not find cros.csv, downloading file..."
+      crosprint "csv"
+    fi
+    # check if cros.csv needs to be "refreshened"
+    if test $(find ~/gam/cros.csv -mmin +480) ; then
+      echo "Updating cros.csv, downloading fresh file..."
+      crosprint "csv"
+    fi
+    echo -e "\n----Comparing----"
+    sort ~/gam/$1 | uniq > ~/gam/tmpcros
+    mv ~/gam/tmpcros ~/gam/$1
+    input=$(wc -l ~/gam/$1  | awk '{ print $1 }')
+    ggrep -if ~/gam/$1 ~/gam/cros.csv > ~/gam/cros_found.csv
+    output=$(wc -l ~/gam/cros_found.csv  | awk '{ print $1 }')
+    ggrep -if ~/gam/$1 ~/gam/cros.csv -o -h | ggrep -if /dev/stdin -v ~/gam/$1 > ~/gam/cros_notfound.txt
+    notfound=$(wc -l ~/gam/cros_notfound.txt  | awk '{ print $1 }')
+    echo -e "Inputfile: ${input}\nFound: ${output}"
+    if [ $notfound -ne 0 ] ; then
+      echo "Did not find:"
+      cat ~/gam/cros_notfound.txt
+    fi
+    cat ~/gam/cros_found.csv | awk -F, '{print $2}' > ~/gam/crosfile.txt
+    head -n 1 ~/gam/cros.csv > ~/gam/tmpcros
+    cat ~/gam/cros_found.csv >> ~/gam/tmpcros
+    mv ~/gam/tmpcros ~/gam/cros_found.csv
+    echo -e "In current OU(s):"
+    cat ~/gam/cros_found.csv | tail -n +2 | awk -F, '{print $7}' | sort | uniq
+    echo -e "----Comparing----\n"
+    echo -e "Examin results in file:\n  cros_found.csv"
+    echo -e "Manual GAM command to move devices:\ngam crosfile crosfile.txt update org [orgUnitPath]"
+    #1=$1:u
+    1=${1^^}
+    echo -e "To move all devices continue with this command:\ncrosbatch move ${1%.*}"
+  elif [[ $1 == "move" ]] ; then
+    #2=$2:u
+    2=${2^^}
+    if [[ $2 == *"/"* ]] ; then
+      ou=${2}
+    elif [[ $2 == *"GR"* ]] ; then
+      ou="/171/Elev/${2}"
+    elif [[ $2 == *"GY"* ]] ; then
+      ou="/170/Elev/${2}"
+    elif [[ $2 == *"KV"* ]] ; then
+      ou="/170/Elev/${2}"
+    else
+      echo "error..."
+      return
+    fi
+    num=$(wc -l ~/gam/crosfile.txt  | awk '{ print $1 }')
+    echo "Move all ${num} devices in 'crosfile.txt' to ${ou}?"
+    echo -e "(y/n)?"
+    read answer
+    if [ "$answer" != "${answer#[Yy]}" ] ; then
+      echo "Now moving all devices to $ou"
+      gam crosfile crosfile.txt update org $ou
+    else
+      echo "Ok, not performing the move."
+    fi
+  else
+    echo -e "No file given as argument..."
   fi
-  if test `find "~/gam/cros.csv" -mmin +600` ; then
-    echo -e "Downloading fresh csv report:"
-    crosprint "csv"
-  fi
-  echo -e "\n----Comparing----"
-  sort "$1" | uniq > tmpcros
-  mv tmpcros "$1"
-  input=$(wc -l "$1"  | awk '{ print $1 }')
-  #head -n 1 cros.csv > cros_found.csv
-  ggrep -if "$1" cros.csv > cros_found.csv
-  output=$(wc -l cros_found.csv  | awk '{ print $1 }')
-  ggrep -if "$1" cros.csv -o -h | grep -if /dev/stdin -v $1 > cros_notfound.txt
-  notfound=$(wc -l cros_notfound.txt  | awk '{ print $1 }')
-  echo -e "Inputfile: ${input}\nFound: ${output}"
-  if [ $notfound -ne 0 ] ; then
-    echo -e "Did not find:"
-    cat cros_notfound.txt
-  fi
-  cat cros_found.csv | awk -F, '{print $2}' > crosfile.txt
-  head -n 1 cros.csv > tmpcros
-  cat cros_found.csv >> tmpcros
-  mv tmpcros cros_found.csv
-  echo -e "----Results----\nList of deviceIds in file:\n  crosfile.txt"
-  echo -e "Complete results in file:\n  cros_found.csv"
-  echo -e "To move all devices (be careful and check the results first):\ngam crosfile crosfile.txt update org /17[0|1]/Elev/[ORGUNIT]"
-  echo -e "To check devices after moving:\ngam crosfile crosfile.txt info fields ou"
 }
-
 
 # Search the "audit log"
 report() {
