@@ -43,11 +43,14 @@ fi
 }
 
 crosbatch() {
-  if test `find "~/gam/cros.csv" -mmin +600` ; then
-    echo "Downloading fresh csv report:"
+  if [ ! -f ~/gam/cros.csv ]; then
     crosprint "csv"
   fi
-  echo "\n----Comparing----"
+  if test `find "~/gam/cros.csv" -mmin +600` ; then
+    echo -e "Downloading fresh csv report:"
+    crosprint "csv"
+  fi
+  echo -e "\n----Comparing----"
   sort "$1" | uniq > tmpcros
   mv tmpcros "$1"
   input=$(wc -l "$1"  | awk '{ print $1 }')
@@ -56,9 +59,9 @@ crosbatch() {
   output=$(wc -l cros_found.csv  | awk '{ print $1 }')
   ggrep -if "$1" cros.csv -o -h | grep -if /dev/stdin -v $1 > cros_notfound.txt
   notfound=$(wc -l cros_notfound.txt  | awk '{ print $1 }')
-  echo "Inputfile: ${input}\nFound: ${output}"
+  echo -e "Inputfile: ${input}\nFound: ${output}"
   if [ $notfound -ne 0 ] ; then
-    echo "Did not find:"
+    echo -e "Did not find:"
     cat cros_notfound.txt
   fi
   cat cros_found.csv | awk -F, '{print $2}' > crosfile.txt
