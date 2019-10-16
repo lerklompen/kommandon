@@ -103,7 +103,7 @@ crosprint() {
     gam user admin get drivefile 1tQj_Zhb2OI0kAnQEk3xxbTOnfxBkusFBFppouqCBh7c format xlsx targetfolder ~/gam
   elif [[ $1 =~ ^(csv)$ ]] ; then
     gam user admin get drivefile 1tQj_Zhb2OI0kAnQEk3xxbTOnfxBkusFBFppouqCBh7c csvsheet crosprint.csv targetfolder ~/gam targetname crosprint.csv overwrite true \
-         && csvcut -c 3,1,2,4,7,8,13 ~/gam/crosprint.csv > cros.csv
+         && csvcut -c 3,1,2,4,7,8,13 ~/gam/crosprint.csv > ~/gam/cros.csv
   fi
 }
 
