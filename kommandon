@@ -81,7 +81,7 @@ crosbatch() {
     cat ~/gam/cros_found.csv | tail -n +2 | awk -F, '{print $7}' | sort | uniq
     echo -e "----Comparing----\n"
     echo -e "Examin results in file:\n  cros_found.csv"
-    echo -e "Manual GAM command to move devices:\ngam crosfile crosfile.txt update org [orgUnitPath]"
+    echo -e "Manual GAM command to move devices:\n  gam crosfile crosfile.txt update org [orgUnitPath]"
     #1=$1:u
     org=${1^^}
     echo -e "To move all devices continue with this command:\ncrosbatch move ${org%.*}"
