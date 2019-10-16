@@ -55,7 +55,7 @@ crosbatch() {
       echo "Did not find cros.csv, downloading file..."
       crosprint "csv"
     fi
-    # check if cros.csv needs to be "refreshened"
+    # check if cros.csv needs to be "refreshed"
     if test $(find ~/gam/cros.csv -mmin +480) ; then
       echo "Updating cros.csv, downloading fresh file..."
       crosprint "csv"
