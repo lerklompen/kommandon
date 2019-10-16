@@ -83,19 +83,19 @@ crosbatch() {
     echo -e "Examin results in file:\n  cros_found.csv"
     echo -e "Manual GAM command to move devices:\ngam crosfile crosfile.txt update org [orgUnitPath]"
     #1=$1:u
-    1=${1^^}
-    echo -e "To move all devices continue with this command:\ncrosbatch move ${1%.*}"
+    org=${1^^}
+    echo -e "To move all devices continue with this command:\ncrosbatch move ${org%.*}"
   elif [[ $1 == "move" ]] ; then
     #2=$2:u
-    2=${2^^}
-    if [[ $2 == *"/"* ]] ; then
-      ou=${2}
-    elif [[ $2 == *"GR"* ]] ; then
-      ou="/171/Elev/${2}"
-    elif [[ $2 == *"GY"* ]] ; then
-      ou="/170/Elev/${2}"
-    elif [[ $2 == *"KV"* ]] ; then
-      ou="/170/Elev/${2}"
+    org=${2^^}
+    if [[ $org == *"/"* ]] ; then
+      ou=${org}
+    elif [[ $org == *"GR"* ]] ; then
+      ou="/171/Elev/${org}"
+    elif [[ $org == *"GY"* ]] ; then
+      ou="/170/Elev/${org}"
+    elif [[ $org == *"KV"* ]] ; then
+      ou="/170/Elev/${org}"
     else
       echo "error..."
       return
