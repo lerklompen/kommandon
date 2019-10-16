@@ -18,6 +18,7 @@ add_kommandon()
     sed -i "s/_userid_/$ad_user/g" ~/.kommandon
     sed -i "s/_ldapurl_/$ad_conf/g" ~/.kommandon
     sed -i "s/ gsed / sed /g" ~/.kommandon
+    sed -i "s/ ggrep / grep /g" ~/.kommandon
     sed -i "s/gmktemp /mktemp /g" ~/.kommandon
     sed -i "s/trash /rm -rf /g" ~/.kommandon
   fi
