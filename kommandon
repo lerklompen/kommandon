@@ -52,7 +52,7 @@ crosbatch() {
     fi
     # check for cros.csv
     if [ ! -f $HOME/gam/cros.csv ]; then
-      echo "Did not find cros.csv, downloading file..."
+      echo "Did not find file 'cros.csv', now downloading..."
       crosprint "csv"
     fi
     # check if cros.csv needs to be "refreshed"
@@ -70,7 +70,7 @@ crosbatch() {
     notfound=$(wc -l ~/gam/cros_notfound.txt  | awk '{ print $1 }')
     echo -e "Inputfile: ${input}\nFound: ${output}"
     if [ $notfound -ne 0 ] ; then
-      echo "Did not find:"
+      echo "Did not find following serial numbers:"
       cat ~/gam/cros_notfound.txt
     fi
     cat ~/gam/cros_found.csv | awk -F, '{print $2}' > ~/gam/crosfile.txt
