@@ -77,7 +77,7 @@ crosbatch() {
     head -n 1 ~/gam/cros.csv > ~/gam/tmpcros
     cat ~/gam/cros_found.csv >> ~/gam/tmpcros
     mv ~/gam/tmpcros ~/gam/cros_found.csv
-    echo -e "In current OU(s):"
+    echo -e "\nFound devices placed in current OU(s):"
     cat ~/gam/cros_found.csv | tail -n +2 | awk -F, '{print $7}' | sort | uniq
     echo -e "----Comparing----\n"
     echo -e "Examin results in file:\n  cros_found.csv"
