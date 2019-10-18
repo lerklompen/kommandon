@@ -201,30 +201,68 @@ classroom() {
       return
     fi
     gam redirect csv "$WORK_DIR"/tmp1 columndelimiter "|" print courses teacher $1 fields "id,name,coursestate,descriptionheading,section,ownerid"
-    cat "$WORK_DIR"/tmp1 | tail -n +2 | awk -v id="id:" -F"|" '{print id$NF}' | sort | uniq > "$WORK_DIR"/tmp2
+    cat "$WORK_DIR"/tmp1 | tail -n +2 | awk -v id="id:" -F"|" '{print id$6}' | sort | uniq > "$WORK_DIR"/tmp2
     gam print users select file "$WORK_DIR"/tmp2 fields "id" | tail -n +2 > "$WORK_DIR"/tmp3
-    echo ""
+    in=$(wc -l "$WORK_DIR"/tmp2  | awk '{ print $1 }')
+    out=$(wc -l "$WORK_DIR"/tmp3  | awk '{ print $1 }')
+    if [ ! $in = $out ] ; then
+      echo -e "\n----\nN.B. Some classroom owners are deleted (orphaned/corrupt classrooms found)\n----\n"
+    fi
     while read r ; do id=$(echo $r | awk -F, '{print $2}') && owner=$(echo $r | awk -F, '{print $1}') && gsed -i "s/${id}/${owner}/g" "$WORK_DIR"/tmp1 ; done < "$WORK_DIR"/tmp3
     mv "$WORK_DIR"/tmp1 ~/gam/${1}.teacher.csv
+    echo -e ""
     cat ~/gam/${1}.teacher.csv
     trash "$WORK_DIR"
+  # check if single classroom
   elif [[ ($# -eq 2) ]] ; then
-    newowner="$2"
-    owner=$(gam info user ${1} quick | tee /dev/tty | grep 'Google Unique ID' | awk '{print $4}')
-    echo "Getting all courses that ${1} owns..."
-    gam print courses teacher ${1} fields "id,name,courseState,ownerId" | ggrep -P "${owner}|ownerId" | tee /dev/tty > ~/gam/${1}.classroom.csv
-    num=$(wc -l ~/gam/${1}.classroom.csv)
-    num=$(expr $num - 1)
-    echo "Transfer all ${num} classrooms owned by ${1} to ${2}?"
+    if [[ $2 =~ ^[0-9]+$ ]] ; then
+      #echo "digits in 2"
+      course=$2
+      new_owner=$1
+    elif [[ $1 =~ ^[0-9]+$ ]] ; then
+      #echo "digits in 1"
+      course=$1
+      new_owner=$2
+    # transfer all classrooms
+    else
+      owner=$(gam info user ${1} quick | grep 'Google Unique ID' | awk '{print $4}')
+      echo "Getting all courses that ${1} owns..."
+      gam print courses teacher ${1} fields "id,name,courseState,ownerId" | ggrep -P "${owner}|ownerId" | tee /dev/tty > ~/gam/${1}.classroom.csv
+      num=$(wc -l ~/gam/${1}.classroom.csv | awk '{print $1}')
+      num=$(expr $num - 1)
+      echo ""
+      echo "Transfer all ${num} classrooms owned by ${1} to ${2}?"
+      echo -e "(y/n)?"
+      read answer
+      if [ "$answer" != "${answer#[Yy]}" ] ;then
+        echo "OK, now transferring..."
+        gam csv ~/gam/${1}.classroom.csv gam course ~~id~~ add teachers $2
+        gam csv ~/gam/${1}.classroom.csv gam update course ~~id~~ owner $2
+        return
+      else
+        echo "OK, not performing command!"
+        return
+      fi
+    fi
+    # transfer single classroom
+    course_info=$(gam info course $course fields "ownerId,name")
+    course_owner=$(echo $course_info | ggrep "ownerEmail: " | awk '{print $2}')
+    course_ownerID=$(echo $course_info | ggrep "ownerId: " | awk '{print $2}')
+    course_name=$(echo $course_info | ggrep "name: " | awk '{print $2}')
+    echo -e "Transfer classroom \"${course_name}\" owned by ${course_owner} to ${new_owner}?"
     echo -e "(y/n)?"
     read answer
     if [ "$answer" != "${answer#[Yy]}" ] ;then
       echo "OK, now transferring..."
-      gam csv ~/gam/${1}.classroom.csv gam course ~~id~~ add teachers $newowner
-      gam csv ~/gam/${1}.classroom.csv gam update course ~~id~~ owner $newowner
+      gam course $course add teachers $new_owner
+      gam update course $course owner $new_owner
+      return
     else
-      echo No
+      echo "OK, not performing command!"
+      return
     fi
+  else
+    echo "classroom - (TODO: explanation of command)"
   fi
 }
 
