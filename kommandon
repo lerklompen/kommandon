@@ -147,6 +147,10 @@ crosprint() {
   fi
 }
 
+userprint () {
+  open -a "Google Chrome" 'https://docs.google.com/spreadsheets/export?id=1QoShvXWsESg026jPUR5QNq9AcESjXvt5ZX_Qe9VzyqI&exportFormat=xlsx'
+}
+
 # transfer Drive files
 transfer() {
   if [ $# -eq 0 ]; then
