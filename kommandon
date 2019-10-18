@@ -246,9 +246,9 @@ classroom() {
     fi
     # transfer single classroom
     course_info=$(gam info course $course fields "ownerId,name")
-    course_owner=$(echo $course_info | ggrep "ownerEmail: " | awk '{print $2}')
-    course_ownerID=$(echo $course_info | ggrep "ownerId: " | awk '{print $2}')
-    course_name=$(echo $course_info | ggrep "name: " | awk '{print $2}')
+    course_owner=$(echo "$course_info" | ggrep "ownerEmail: " | awk '{print $2}')
+    course_ownerID=$(echo "$course_info" | ggrep "ownerId: " | awk '{print $2}')
+    course_name=$(echo "$course_info" | ggrep "name: " | awk '{print $2}')
     echo -e "Transfer classroom \"${course_name}\" owned by ${course_owner} to ${new_owner}?"
     echo -e "(y/n)?"
     read answer
