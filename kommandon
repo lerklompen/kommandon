@@ -205,7 +205,7 @@ classroom() {
       return
     fi
     gam redirect csv "$WORK_DIR"/tmp1 columndelimiter "|" print courses teacher $1 fields "id,name,coursestate,descriptionheading,section,ownerid"
-    cat "$WORK_DIR"/tmp1 | tail -n +2 | awk -v id="id:" -F"|" '{print id$6}' | sort | uniq > "$WORK_DIR"/tmp2
+    cat "$WORK_DIR"/tmp1 | tail -n +2 | awk -v id="id:" -F"|" '{print id$NF}' | sort | uniq > "$WORK_DIR"/tmp2
     gam print users select file "$WORK_DIR"/tmp2 fields "id" | tail -n +2 > "$WORK_DIR"/tmp3
     in=$(wc -l "$WORK_DIR"/tmp2  | awk '{ print $1 }')
     out=$(wc -l "$WORK_DIR"/tmp3  | awk '{ print $1 }')
