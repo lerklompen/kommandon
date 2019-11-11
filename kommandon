@@ -19,7 +19,7 @@ ad_user='_userid_'
 cros() {
 if [[ ($# -eq 2) ]] ; then
   if [[ $2 =~ ^(users|recent)$ ]] ; then
-    gam info cros query id:"$1" fields "deviceid,org,serialnumber,status,model,osversion,lastsync,recentusers,macaddress"
+    gam info cros query id:"$1" fields "deviceid,org,serialnumber,status,model,osversion,lastsync,lastenrollmenttime,macaddress,recentusers,autoUpdateExpiration"
   else
     if [[ $2 == *"/"* ]] ; then
       gam update cros query id:${1} org ${2}
@@ -38,7 +38,7 @@ if [[ ($# -eq 2) ]] ; then
     fi
   fi
 else
-    gam info cros query id:"$1" fields "deviceid,org,serialnumber,status,model,osversion,lastsync,macaddress"
+    gam info cros query id:"$1" fields "deviceid,org,serialnumber,status,model,osversion,lastsync,lastenrollmenttime,macaddress,autoUpdateExpiration"
 fi
 }
 
