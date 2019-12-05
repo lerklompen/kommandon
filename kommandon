@@ -78,7 +78,7 @@ crosbatch() {
     cat ~/gam/cros_found.csv >> ~/gam/tmpcros
     mv ~/gam/tmpcros ~/gam/cros_found.csv
     org=${1%.*}
-    org=${org:^^}
+    org=${org^^}
     echo -e "\nFound devices placed in other OU(s):"
     ggrep -v "$org" ~/gam/cros_found.csv | awk -F, 'OFS="," {print $3,$4,$5,$7}'
     echo -e "----Comparing----\n"
