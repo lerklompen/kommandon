@@ -77,14 +77,16 @@ crosbatch() {
     head -n 1 ~/gam/cros.csv > ~/gam/tmpcros
     cat ~/gam/cros_found.csv >> ~/gam/tmpcros
     mv ~/gam/tmpcros ~/gam/cros_found.csv
-    echo -e "\nFound devices placed in current OU(s):"
-    cat ~/gam/cros_found.csv | tail -n +2 | awk -F, '{print $7}' | sort | uniq
+    org=${1%.*}
+    org=${org:^^}
+    echo -e "\nFound devices placed in other OU(s):"
+    ggrep -v "$org" ~/gam/cros_found.csv | awk -F, 'OFS="," {print $3,$4,$5,$7}'
     echo -e "----Comparing----\n"
     echo -e "Examin results in file:\n  cros_found.csv"
     echo -e "Manual GAM command to move devices:\n  gam crosfile crosfile.txt update org [orgUnitPath]"
     #1=$1:u
-    org=${1^^}
-    echo -e "To move all devices continue with this command:\ncrosbatch move ${org%.*}"
+    #org=${1^^}
+    echo -e "To move all devices continue with this command:\ncrosbatch move $org"
   elif [[ $1 == "move" ]] ; then
     #2=$2:u
     org=${2^^}
