@@ -60,41 +60,41 @@ crosbatch() {
     fi
     echo -e "\n----Comparing----"
     sort ~/gam/$1 | uniq > ~/gam/tmpcros
-    mv ~/gam/tmpcros ~/gam/$1
-    input=$(wc -l ~/gam/$1  | awk '{ print $1 }')
-    ggrep -if ~/gam/$1 ~/gam/cros.csv > ~/gam/cros_found.csv
+    #mv ~/gam/tmpcros ~/gam/$1
+    input=$(wc -l ~/gam/tmpcros  | awk '{ print $1 }')
+    ggrep -if ~/gam/tmpcros ~/gam/cros.csv > ~/gam/cros_found.csv
     output=$(wc -l ~/gam/cros_found.csv  | awk '{ print $1 }')
-    ggrep -if ~/gam/$1 ~/gam/cros.csv -o -h | ggrep -if /dev/stdin -v ~/gam/$1 > ~/gam/cros_notfound.txt
+    ggrep -if ~/gam/tmpcros ~/gam/cros.csv -o -h | ggrep -if /dev/stdin -v ~/gam/tmpcros > ~/gam/cros_notfound.txt
     notfound=$(wc -l ~/gam/cros_notfound.txt  | awk '{ print $1 }')
     echo -e "Inputfile: ${input}\nFound: ${output}"
     if [ $notfound -ne 0 ] ; then
-      echo "Did not find following serial numbers:"
+      echo "Did not find the following serial numbers:"
       cat ~/gam/cros_notfound.txt
     fi
     cat ~/gam/cros_found.csv | awk -F, '{print $2}' > ~/gam/crosfile.txt
-    head -n 1 ~/gam/cros.csv > ~/gam/tmpcros
-    cat ~/gam/cros_found.csv >> ~/gam/tmpcros
-    mv ~/gam/tmpcros ~/gam/cros_found.csv
+    head -n 1 ~/gam/cros.csv > ~/gam/tmpcros2
+    cat ~/gam/cros_found.csv >> ~/gam/tmpcros2
+    mv ~/gam/tmpcros2 ~/gam/cros_found.csv
+    # what OU are we checking?
     org=${1%.*}
-    org=${org^^}
+    org=${org:u}
+    #echo -e "\nFound devices placed in current OU(s):"
+    #cat ~/gam/cros_found.csv | tail -n +2 | awk -F, '{print $7}' | sort | uniq
     echo -e "\nFound devices placed in other OU(s):"
     ggrep -v "$org" ~/gam/cros_found.csv | awk -F, 'OFS="," {print $3,$4,$5,$7}'
     echo -e "----Comparing----\n"
-    echo -e "Examin results in file:\n  cros_found.csv"
-    echo -e "Manual GAM command to move devices:\n  gam crosfile crosfile.txt update org [orgUnitPath]"
-    #1=$1:u
-    #org=${1^^}
+    echo -e "All results in file:\n  cros_found.csv"
+    echo -e "Manual GAM command to move devices:\ngam crosfile crosfile.txt update org [orgUnitPath]"
+    # 1=${1^^}
     echo -e "To move all devices continue with this command:\ncrosbatch move $org"
   elif [[ $1 == "move" ]] ; then
-    #2=$2:u
-    org=${2^^}
+    org=$2:u
+    # 2=${2^^}
     if [[ $org == *"/"* ]] ; then
-      ou=${org}
-    elif [[ $org == *"GR"* ]] ; then
+      ou=${2}
+    elif [[ $org =~ GR$ || $org =~ GRS$ || $org =~ EST$ ]] ; then
       ou="/171/Elev/${org}"
-    elif [[ $org == *"GY"* ]] ; then
-      ou="/170/Elev/${org}"
-    elif [[ $org == *"KV"* ]] ; then
+    elif [[ $org =~ GY$ || $org =~ GYS$ || $org =~ KV$ || $org =~ SFI$ || $org =~ SUV$ || $org =~ YH$ ]] ; then
       ou="/170/Elev/${org}"
     else
       echo "error..."
@@ -106,12 +106,36 @@ crosbatch() {
     read answer
     if [ "$answer" != "${answer#[Yy]}" ] ; then
       echo "Now moving all devices to $ou"
-      gam crosfile crosfile.txt update org $ou
+      gam crosfile ~/gam/crosfile.txt update org $ou && gam print cros limittoou $ou > ~/gam/croscomp.csv
+      ggrep -f ~/gam/crosfile.txt ~/gam/croscomp.csv > ~/gam/croscomp_found.csv
+      ggrep -v -f ~/gam/crosfile.txt ~/gam/croscomp_found.csv > ~/gam/temp_found
+      cros_remain=$(wc -l ~/gam/temp_found  | awk '{ print $1 }')
+      if [[ "$cros_remain" == "0" ]] ; then
+        echo "OK all devices now moved successfully!"
+      else
+        mv ~/gam/temp_found ~/gam/crosfile.txt
+        echo "$cros_remain device(s) not moved - please run the last command again"
+      fi
+      #echo "To check status of the batch 'crosbatch check' \n(you might have to rerun the last command if not successful..."
     else
       echo "Ok, not performing the move."
     fi
+  elif [[ $1 == "check" ]] ; then
+    ggrep -f ~/gam/crosfile.txt ~/gam/croscomp.csv > ~/gam/croscomp_found.csv
+    ggrep -v -f ~/gam/crosfile.txt ~/gam/croscomp_found.csv > ~/gam/temp_found
+    cros_remain=$(wc -l ~/gam/temp_found  | awk '{ print $1 }')
+    if [[ "$cros_remain" == "0" ]] ; then
+      echo "OK all devices now moved successfully!"
+    else
+      mv ~/gam/temp_found ~/gam/crosfile.txt
+      echo "$cros_remain device(s) not moved - please rerun the same command"
+    fi
+  elif [[ $1 == "deprovision" ]] ; then
+    echo -e "TODO - code for deprovisioning\
+             \nall CB in file"
   else
-    echo -e "No file given as argument..."
+    echo -e "Please specify a file containing one serial number per row!"
+    echo -e "Example: crosbatch SPGR.txt"
   fi
 }
 
