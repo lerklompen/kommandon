@@ -19,26 +19,24 @@ ad_user='_userid_'
 cros() {
 if [[ ($# -eq 2) ]] ; then
   if [[ $2 =~ ^(users|recent)$ ]] ; then
-    gam info cros query id:"$1" fields "deviceid,org,serialnumber,status,model,osversion,lastsync,lastenrollmenttime,macaddress,recentusers,autoUpdateExpiration"
+    gam info cros query id:"$1" fields "deviceid,org,serialnumber,status,notes,annotatedUser,annotatedAssetId,model,osversion,lastsync,lastenrollmenttime,macaddress,recentusers,autoUpdateExpiration"
+  elif [[ $2 =~ ^(enable|reenable)$ ]] ; then
+    gam update cros query id:${1} action reenable
+  elif [[ $2 =~ ^(disable)$ ]] ; then
+    gam update cros query id:${1} action disable
   else
     if [[ $2 == *"/"* ]] ; then
       gam update cros query id:${1} org ${2}
-    elif [[ $2 == *"GR"* ]] ; then
+    elif [[ $2 =~ GR$ || $2 =~ GRS$ || $2 =~ EST$ ]] ; then
       gam update cros query id:${1} org /171/Elev/${2}
-    elif [[ $2 == *"GY"* ]] ; then
+    elif [[ $2 =~ GY$ || $2 =~ GYS$ || $2 =~ KV$ || $2 =~ SFI$ || $2 =~ SUV$ || $2 =~ YH$ ]] ; then
       gam update cros query id:${1} org /170/Elev/${2}
-    elif [[ $2 == *"KV"* ]] ; then
-      gam update cros query id:${1} org /170/Elev/${2}
-    elif [[ $2 =~ ^(enable|reenable)$ ]] ; then
-      gam update cros query id:${1} action reenable
-    elif [[ $2 =~ ^(disable)$ ]] ; then
-      gam update cros query id:${1} action disable
     else
       echo "unknown org or command"
     fi
   fi
 else
-    gam info cros query id:"$1" fields "deviceid,org,serialnumber,status,model,osversion,lastsync,lastenrollmenttime,macaddress,autoUpdateExpiration"
+  gam info cros query id:"$1" fields "deviceid,org,serialnumber,status,notes,annotatedUser,annotatedAssetId,model,osversion,lastsync,lastenrollmenttime,macaddress,autoUpdateExpiration"
 fi
 }
 
