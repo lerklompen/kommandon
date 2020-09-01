@@ -108,7 +108,7 @@ crosbatch() {
       echo "Now moving all devices to $ou"
       gam crosfile ~/gam/crosfile.txt update org $ou && gam print cros limittoou $ou > ~/gam/croscomp.csv
       ggrep -f ~/gam/crosfile.txt ~/gam/croscomp.csv > ~/gam/croscomp_found.csv
-      ggrep -v -f ~/gam/crosfile.txt ~/gam/croscomp_found.csv > ~/gam/temp_found
+      ggrep -v -f ~/gam/croscomp_found.csv ~/gam/crosfile.txt > ~/gam/temp_found
       cros_remain=$(wc -l ~/gam/temp_found  | awk '{ print $1 }')
       if [[ "$cros_remain" == "0" ]] ; then
         echo "OK all devices now moved successfully!"
