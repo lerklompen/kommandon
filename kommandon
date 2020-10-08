@@ -310,7 +310,7 @@ AD() {
     rm ~/gam/memberOf.txt
     printf "(|" > ~/gam/memberOf.txt
     ldapsearch -LLL -o ldif-wrap=no -H $ad_conf -b \
-        "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=matsve4,OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
+        "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=${ad_user},OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
         -y ~/gam/.pass.txt "(&(mail=${2}*))" \
         cn otherMailbox mail displayName givenName sn department memberOf title physicalDeliveryOfficeName telephoneNumber company \
         adminDescription streetAddress division roomNumber manager mobile departmentNumber > ~/gam/ldap_out.txt
@@ -359,7 +359,7 @@ AD() {
       < ~/gam/ldap_out.txt | tee >(grep memberOf | gegrep "17[01]G|SchoolEmployees|EDU_Students" > ~/gam/memberOf.txt) | grep -v memberOf && cat ~/gam/memberOf.txt
   elif [[ $1 =~ ^(empgroup)$ ]] ; then
     ldapsearch -LLL -o ldif-wrap=no -H $ad_conf -b \
-      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=matsve4,OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
+      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=${ad_user},OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
       -y ~/gam/.pass.txt "(&(adminDisplayName=adm-schoolemployees-school-${2}-*)(CN=ADM_SchoolEmployees-17*-School-*))" \
       member description adminDisplayName > ~/gam/ldap_out.txt
       #rm ~/gam/groupmembers.txt
@@ -378,7 +378,7 @@ AD() {
     AD othermail $groupmembers
   elif [[ $1 =~ ^(othermail)$ ]] ; then
     ldapsearch -LLL -o ldif-wrap=no -H $ad_conf -b \
-      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=matsve4,OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
+      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=${ad_user},OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
       -y ~/gam/.pass.txt $2 \
       otherMailbox > ~/gam/ldap_othermail.txt
     while read l ; do
@@ -395,7 +395,7 @@ AD() {
 
 ADgroup() {
   ldapsearch -LLL -o ldif-wrap=no -H $ad_conf -b \
-      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=matsve4,OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
+      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=${ad_user},OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
       -y ~/gam/.pass.txt $1 \
       displayName adminDisplayName > ~/gam/ldap_group.txt
   while read l
