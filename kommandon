@@ -307,14 +307,38 @@ AD() {
       if [[ $a == *"::" ]] ; then d=$(echo $b | base64 --decode) &&  c=$(echo "${a:0:-1} $d") && echo $c ; else echo $l ; fi ; done \
       < ~/gam/ldap_out.txt | tee >(grep memberOf | gegrep "17[01]G|SchoolEmployees|EDU_Students" > ~/gam/memberOf.txt) | grep -v memberOf && cat ~/gam/memberOf.txt
   elif [[ $1 =~ ^(mail|email)$ ]] ; then
+    rm ~/gam/memberOf.txt
+    printf "(|" > ~/gam/memberOf.txt
     ldapsearch -LLL -o ldif-wrap=no -H $ad_conf -b \
-      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=${ad_user},OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
-      -y ~/gam/.pass.txt "(&(mail=${2}*))" \
-      cn otherMailbox mail displayName department memberOf title physicalDeliveryOfficeName telephoneNumber company \
-      adminDescription streetAddress division roomNumber manager mobile departmentNumber \
-       > ~/gam/ldap_out.txt  && while read l ; do a=$(echo $l | awk '{print $1}') && b=$(echo $l | awk '{print $2}') && \
-      if [[ $a == *"::" ]] ; then d=$(echo $b | base64 --decode) &&  c=$(echo "${a:0:-1} $d") && echo $c ; else echo $l ; fi ; done \
-      < ~/gam/ldap_out.txt | tee >(grep memberOf | gegrep "17[01]G|SchoolEmployees|EDU_Students" > ~/gam/memberOf.txt) | grep -v memberOf && cat ~/gam/memberOf.txt
+        "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=matsve4,OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
+        -y ~/gam/.pass.txt "(&(mail=${2}*))" \
+        cn otherMailbox mail displayName givenName sn department memberOf title physicalDeliveryOfficeName telephoneNumber company \
+        adminDescription streetAddress division roomNumber manager mobile departmentNumber > ~/gam/ldap_out.txt
+    while read l
+    do
+      a=$(echo $l | awk '{print $1}')
+      b=$(echo $l | awk '{print $2}')
+      if [[ $a == *"::" ]] ; then
+        c=$(echo $b | base64 --decode)
+        l=$(echo "${a:0:-1} $c")
+        a=$(echo $l | awk '{print $1}')
+        b=$(echo $l | awk '{print $2}')
+      fi
+      if [[ $a == "memberOf:" ]] ; then
+        g=$(echo $b | awk -F, '{print $1}' | awk -F"=" '{print $2}')
+        printf "(CN=${g})" | gegrep "17[01]G|SchoolEmployees|EDU_Students" >> ~/gam/memberOf.txt
+      elif [[ $a == "mail:" ]] ; then
+        echo $l
+        echo "groups:"
+        printf ")" >> ~/gam/memberOf.txt
+        groups=$(cat ~/gam/memberOf.txt)
+        ADgroup "$groups"
+        # If multiple hits - remove previous users groups from list
+        #rm ~/gam/memberOf.txt
+      else
+        echo $l
+      fi
+    done < ~/gam/ldap_out.txt
   elif [[ $1 =~ ^(mail_and_groups|email_and_groups)$ ]] ; then
     ldapsearch -LLL -o ldif-wrap=no -H $ad_conf -b \
       "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=${ad_user},OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
@@ -333,9 +357,60 @@ AD() {
        > ~/gam/ldap_out.txt  && while read l ; do a=$(echo $l | awk '{print $1}') && b=$(echo $l | awk '{print $2}') && \
       if [[ $a == *"::" ]] ; then d=$(echo $b | base64 --decode) &&  c=$(echo "${a:0:-1} $d") && echo $c ; else echo $l ; fi ; done \
       < ~/gam/ldap_out.txt | tee >(grep memberOf | gegrep "17[01]G|SchoolEmployees|EDU_Students" > ~/gam/memberOf.txt) | grep -v memberOf && cat ~/gam/memberOf.txt
+  elif [[ $1 =~ ^(empgroup)$ ]] ; then
+    ldapsearch -LLL -o ldif-wrap=no -H $ad_conf -b \
+      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=matsve4,OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
+      -y ~/gam/.pass.txt "(&(adminDisplayName=adm-schoolemployees-school-${2}-*)(CN=ADM_SchoolEmployees-17*-School-*))" \
+      member description adminDisplayName > ~/gam/ldap_out.txt
+      #rm ~/gam/groupmembers.txt
+    printf "(|" > ~/gam/groupmembers.txt
+    while read l
+    do 
+      a=$(echo $l | awk '{print $1}') 
+      b=$(echo $l | awk '{print $2}')
+      if [[ $a == "member:" ]] ; then
+        c=$(echo $b | awk -F, '{print $1}' | awk -F"=" '{print $NF}')
+        printf "(CN=${c})" >> ~/gam/groupmembers.txt
+      fi
+    done < ~/gam/ldap_out.txt
+    printf ")" >> ~/gam/groupmembers.txt
+    groupmembers=$(cat ~/gam/groupmembers.txt)
+    AD othermail $groupmembers
+  elif [[ $1 =~ ^(othermail)$ ]] ; then
+    ldapsearch -LLL -o ldif-wrap=no -H $ad_conf -b \
+      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=matsve4,OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
+      -y ~/gam/.pass.txt $2 \
+      otherMailbox > ~/gam/ldap_othermail.txt
+    while read l ; do
+      a=$(echo $l | awk '{print $1}')
+      b=$(echo $l | awk '{print $2}')
+      if [[ $a == "otherMailbox:" ]] ; then
+        echo $b
+      fi
+    done < ~/gam/ldap_othermail.txt
   else
     echo "unknown command"
   fi
+}
+
+ADgroup() {
+  ldapsearch -LLL -o ldif-wrap=no -H $ad_conf -b \
+      "OU=Malmo,DC=intra,DC=malmo,DC=se" -D "CN=matsve4,OU=Employees,OU=ADM,OU=Malmo,DC=intra,DC=malmo,DC=se" \
+      -y ~/gam/.pass.txt $1 \
+      displayName adminDisplayName > ~/gam/ldap_group.txt
+  while read l
+  do
+    a=$(echo $l | awk '{print $1}')
+    b=$(echo $l | awk '{print $2}')
+    if [[ $a == *"::" ]] ; then
+      a=$(echo $l | awk '{print $1}')
+      b=$(echo $b | base64 --decode)
+      #b=$(echo "${a:0:-1} $c")
+    fi
+    if [[ $a =~ "displayName" ]] ; then
+      echo $b
+    fi
+  done < ~/gam/ldap_group.txt
 }
 
 # aliases
