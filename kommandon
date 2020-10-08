@@ -347,7 +347,7 @@ alias updatekommando='bash <(curl -s -S -L https://git.io/Jesrp)'
 ### GAM
 alias user='gam info user'
 alias group='gam info group'
-alias gamupdate='gam version checkrc && if [ $? -eq 0 ]; then echo "gam is already latest version - update not needed"; else bash <(curl -s -S -L https://git.io/fhZWP) -l; fi'
+alias gamupdate='gam version checkrc && if [ $? -eq 0 ]; then echo "gam is already latest version - update not needed"; else bash <(curl -s -S -L https://git.io/fhZWP) -l ; fi'
 alias unsuspend='gam unsuspend user'
 
 ### EXTENS
