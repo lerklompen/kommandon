@@ -43,6 +43,15 @@ fi
 }
 
 crosbatch() {
+  autoload colors; colors
+  green="$fg[green]"
+  yellow="$bg[yellow]$fg[black]"
+  red="$bg[red]$fg[black]"
+  magenta="$bg[magenta]$fg[black]"
+  cyan="$bg[cyan]$fg[black]"
+  white="$bg[white]$fg[black]"
+  blue="$bg[blue]$fg[black]"
+  reset="$reset_color"
   # check if file with extension is given as argument
   if [[ $1 == *"."* ]] ; then
     # check if file actually exists
@@ -60,17 +69,22 @@ crosbatch() {
       echo "Updating cros.csv, downloading fresh file..."
       crosprint "csv"
     fi
-    echo -e "\n----Comparing----"
+    #echo -e "\n----Comparing----"
     sort ~/gam/$1 | uniq > ~/gam/tmpcros
     #mv ~/gam/tmpcros ~/gam/$1
     input=$(wc -l ~/gam/tmpcros  | awk '{ print $1 }')
-    ggrep -if ~/gam/tmpcros ~/gam/cros.csv > ~/gam/cros_found.csv
-    output=$(wc -l ~/gam/cros_found.csv  | awk '{ print $1 }')
-    ggrep -if ~/gam/tmpcros ~/gam/cros.csv -o -h | ggrep -if /dev/stdin -v ~/gam/tmpcros > ~/gam/cros_notfound.txt
-    notfound=$(wc -l ~/gam/cros_notfound.txt  | awk '{ print $1 }')
-    echo -e "Inputfile: ${input}\nFound: ${output}"
+    while read sn
+      do ggrep ",${sn}," ~/gam/cros.csv
+    done < ~/gam/tmpcros > ~/gam/cros_found.csv
+    csvcut -c 3 cros_found.csv > sn_found.csv
+    # ggrep -if ~/gam/tmpcros ~/gam/cros.csv > ~/gam/cros_found.csv
+    output=$(wc -l ~/gam/cros_found.csv | awk '{ print $1 }')
+    #ggrep -if ~/gam/tmpcros ~/gam/cros.csv -o -h | ggrep -if /dev/stdin -v ~/gam/tmpcros > ~/gam/cros_notfound.txt
+	comm -23 ~/gam/tmpcros ~/gam/sn_found.csv > ~/gam/cros_notfound.txt
+    notfound=$(wc -l ~/gam/cros_notfound.txt | awk '{ print $1 }')
+    echo -e "${white}Inputfile:${reset} ${green}${input}${reset}\n${yellow}Found:${reset} ${green}${output}${reset}\n"
     if [ $notfound -ne 0 ] ; then
-      echo "Did not find the following serial numbers:"
+      echo "${red}Did not find the following serial numbers:${reset}"
       cat ~/gam/cros_notfound.txt
     fi
     cat ~/gam/cros_found.csv | awk -F, '{print $2}' > ~/gam/crosfile.txt
@@ -82,13 +96,19 @@ crosbatch() {
     org=${org:u}
     #echo -e "\nFound devices placed in current OU(s):"
     #cat ~/gam/cros_found.csv | tail -n +2 | awk -F, '{print $7}' | sort | uniq
-    echo -e "\nFound devices placed in other OU(s):"
-    ggrep -v "$org" ~/gam/cros_found.csv | awk -F, 'OFS="," {print $3,$4,$5,$7}'
-    echo -e "----Comparing----\n"
-    echo -e "All results in file:\n  cros_found.csv"
-    echo -e "Manual GAM command to move devices:\ngam crosfile crosfile.txt update org [orgUnitPath]"
+    ggrep -v "$org" ~/gam/cros_found.csv | awk -F, 'OFS="," {print $3,$4,$5,$7}' > cros_in_other_orgs.csv
+    otherorgs=$(wc -l ~/gam/cros_in_other_orgs.csv | awk '{ print $1 }')
+    if [ $otherorgs -gt 1 ] ; then
+      echo -e "\n${cyan}Found devices placed in other OU(s):${reset}"
+      cat ~/gam/cros_in_other_orgs.csv
+    else
+      echo -e "\n${cyan}All devices found are already placed in ${org}${reset}\n"
+    fi
+    echo -e "\n${magenta}To examine the results, look in the file:${reset}\n  ${green}cros_found.csv${reset}\n"
     # 1=${1^^}
-    echo -e "To move all devices continue with this command:\ncrosbatch move $org"
+    echo -e "${white}To manually specify OU:${reset}\n${green}crosbatch move /orgUnitPath${reset}"
+    echo -e "${white}Or continue with this command:${reset}\n${green}crosbatch move ${org}${reset}"
+    echo -e "${white}To retire correctly placed devices continue with this command:${reset}\n${green}crosbatch retire $org 'Reason for retire device'${reset}"
   elif [[ $1 == "move" ]] ; then
     org=$2:u
     # 2=${2^^}
@@ -109,6 +129,7 @@ crosbatch() {
     if [ "$answer" != "${answer#[Yy]}" ] ; then
       echo "Now moving all devices to $ou"
       gsed '1i\id' ~/gam/crosfile.txt > ~/gam/crosfile.csv
+      #gam crosfile ~/gam/crosfile.txt update org $ou && gam print cros limittoou $ou > ~/gam/croscomp.csv
       gam csv ~/gam/crosfile.csv gam update cros ~~id~~ org $ou && gam print cros limittoou $ou > ~/gam/croscomp.csv
       ggrep -f ~/gam/crosfile.txt ~/gam/croscomp.csv > ~/gam/croscomp_found.csv
       ggrep -v -f ~/gam/croscomp_found.csv ~/gam/crosfile.txt > ~/gam/temp_found
@@ -133,9 +154,36 @@ crosbatch() {
       mv ~/gam/temp_found ~/gam/crosfile.txt
       echo "$cros_remain device(s) not moved - please rerun the same command"
     fi
-  elif [[ $1 == "deprovision" ]] ; then
-    echo -e "TODO - code for deprovisioning\
-             \nall CB in file"
+  elif [[ $1 == "retire" ]] ; then
+    if [[ $# -ne 3 ]]; then
+      echo "Illegal number of arguments (${#}), command must contain 3:\ncrosbatch retire XXGR 'Reason for retire device'"
+      return
+    fi
+    # TODO: first check and count how many to be retired (i.e. in correct OU:s), check for a reason, reveal info for user
+    ggrep -E "status,deviceId|${2}" ~/gam/cros_found.csv > ~/gam/retire.csv
+    ggrep -v -E "status,deviceId|${2}" ~/gam/cros_found.csv > ~/gam/not_retired.csv
+    not_retired=$(wc -l ~/gam/not_retired.csv | awk '{ print $1 }')
+    to_retire=$(wc -l ~/gam/retire.csv | awk '{ print $1 }')
+    to_retire=$(expr $to_retire - 1)
+    if [[ $not_retired != "0" ]] ; then
+      echo "${yellow}${not_retired} device(s) out of scope${reset} (i.e. do not match OU), and will not be retired.\n${magenta}Check what device(s) in file:${reset}\n  ${green}not_retired.csv${reset}\n"
+    fi
+    
+    echo "${cyan}Retire all ${to_retire} devices in 'retire.csv' with reason '$3'?${reset}"
+    echo -e "(y/n)?"
+    read answer
+    if [ "$answer" != "${answer#[Yy]}" ] ; then
+      ggrep -E "status,deviceId|DISABLED" ~/gam/retire.csv > ~/gam/reenable.csv
+      retire_check=$(wc -l ~/gam/reenable.csv | awk '{ print $1 }')
+      if [[ $retire_check == "1" ]] ; then
+        echo 'No devices need to be reenabled, continuing...'
+      else
+        echo 'First reenabling devices...'
+        gam csv ~/gam/reenable.csv gam update cros ~~deviceId~~ action reenable
+      fi
+      echo 'Now retiring...'
+      gam csv ~/gam/retire.csv gam update cros ~~deviceId~~ user ~~orgUnitPath~~ notes "${3}" ou /RETIRED
+    fi
   else
     echo -e "Please specify a file containing one serial number per row!"
     echo -e "Example: crosbatch SPGR.txt"
