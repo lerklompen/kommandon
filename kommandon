@@ -15,6 +15,11 @@ ad_conf='ldaps://_ldapurl_:636'
 ad_user='_userid_'
 
 ##### GAM functions
+# Search staff by userID
+userid() {
+  gam info users query employmentData.userID=${1}
+}
+
 # info and actions on ChromeOS devices
 cros() {
 if [[ ($# -eq 2) ]] ; then
