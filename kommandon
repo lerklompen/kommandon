@@ -75,7 +75,7 @@ crosbatch() {
       crosprint "csv"
     fi
     #echo -e "\n----Comparing----"
-    sort ~/gam/$1 | uniq > ~/gam/tmpcros
+    sort ~/gam/$1 | uniq | tr -d " " > ~/gam/tmpcros
     #mv ~/gam/tmpcros ~/gam/$1
     input=$(wc -l ~/gam/tmpcros  | awk '{ print $1 }')
     while read sn
