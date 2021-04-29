@@ -74,20 +74,25 @@ crosbatch() {
       echo "Updating cros.csv, downloading fresh file..."
       crosprint "csv"
     fi
-    #echo -e "\n----Comparing----"
-    sort ~/gam/$1 | uniq | tr -d " " > ~/gam/tmpcros
-    #mv ~/gam/tmpcros ~/gam/$1
-    input=$(wc -l ~/gam/tmpcros  | awk '{ print $1 }')
+    sort ~/gam/$1 | uniq | tr -d " " | awk '{ print toupper($0) }' > ~/gam/tmpcros
+    count_infile=$(wc -l ~/gam/tmpcros  | awk '{ print $1 }')
     while read sn
-      do ggrep ",${sn}," ~/gam/cros.csv
+      do ggrep -i ",${sn}," ~/gam/cros.csv
     done < ~/gam/tmpcros > ~/gam/cros_found.csv
-    csvcut -c 3 cros_found.csv > sn_found.csv
+    csvcut -c 3 cros_found.csv | awk '{ print toupper($0) }' > sn_found.csv
     # ggrep -if ~/gam/tmpcros ~/gam/cros.csv > ~/gam/cros_found.csv
-    output=$(wc -l ~/gam/cros_found.csv | awk '{ print $1 }')
+    count_outfile=$(wc -l ~/gam/cros_found.csv | awk '{ print $1 }')
     #ggrep -if ~/gam/tmpcros ~/gam/cros.csv -o -h | ggrep -if /dev/stdin -v ~/gam/tmpcros > ~/gam/cros_notfound.txt
-	comm -23 ~/gam/tmpcros ~/gam/sn_found.csv > ~/gam/cros_notfound.txt
+    comm -23 ~/gam/tmpcros ~/gam/sn_found.csv > ~/gam/cros_notfound.txt
     notfound=$(wc -l ~/gam/cros_notfound.txt | awk '{ print $1 }')
-    echo -e "${white}Inputfile:${reset} ${green}${input}${reset}\n${yellow}Found:${reset} ${green}${output}${reset}\n"
+    echo -e "${white}Inputfile:${reset} ${green}${count_infile}${reset}\n${yellow}Found:${reset} ${green}${count_outfile}${reset}\n"
+	check_multiple=$(sort sn_found.csv | uniq -c | grep -v '^ *1 ')
+    if [ $check_multiple ] ; then
+      echo -e "${red}WARNING! Multiple matching serial numbers found!"
+      echo $check_multiple | awk '{print $2 " found " $1 " times"}'
+      echo "${reset}"
+      echo ""
+    fi
     if [ $notfound -ne 0 ] ; then
       echo "${red}Did not find the following serial numbers:${reset}"
       cat ~/gam/cros_notfound.txt
@@ -96,12 +101,15 @@ crosbatch() {
     head -n 1 ~/gam/cros.csv > ~/gam/tmpcros2
     cat ~/gam/cros_found.csv >> ~/gam/tmpcros2
     mv ~/gam/tmpcros2 ~/gam/cros_found.csv
+    if [[ $1 == "primary_users_devices.csv" ]] ; then
+      return
+    fi
     # what OU are we checking?
     org=${1%.*}
     org=${org:u}
     #echo -e "\nFound devices placed in current OU(s):"
     #cat ~/gam/cros_found.csv | tail -n +2 | awk -F, '{print $7}' | sort | uniq
-    ggrep -v "$org" ~/gam/cros_found.csv | awk -F, 'OFS="," {print $3,$4,$5,$7}' > cros_in_other_orgs.csv
+    ggrep -v "$org" ~/gam/cros_found.csv | awk -F, 'OFS="," {print $3,$5,$7}' > ~/gam/cros_in_other_orgs.csv
     otherorgs=$(wc -l ~/gam/cros_in_other_orgs.csv | awk '{ print $1 }')
     if [ $otherorgs -gt 1 ] ; then
       echo -e "\n${cyan}Found devices placed in other OU(s):${reset}"
@@ -145,26 +153,52 @@ crosbatch() {
         mv ~/gam/temp_found ~/gam/crosfile.txt
         echo "$cros_remain device(s) not moved - please run the last command again"
       fi
-      #echo "To check status of the batch 'crosbatch check' \n(you might have to rerun the last command if not successful..."
     else
       echo "Ok, not performing the move."
     fi
-  elif [[ $1 == "check" ]] ; then
-    ggrep -f ~/gam/crosfile.txt ~/gam/croscomp.csv > ~/gam/croscomp_found.csv
-    ggrep -v -f ~/gam/crosfile.txt ~/gam/croscomp_found.csv > ~/gam/temp_found
-    cros_remain=$(wc -l ~/gam/temp_found  | awk '{ print $1 }')
-    if [[ "$cros_remain" == "0" ]] ; then
-      echo "OK all devices now moved successfully!"
-    else
-      mv ~/gam/temp_found ~/gam/crosfile.txt
-      echo "$cros_remain device(s) not moved - please rerun the same command"
+  elif [[ $1 == "userlist" || $1 == "primary" ]] ; then
+    if [[ $# -ne 2 ]]; then
+      echo "File must contain:\n column 1 - serialnumber (or deviceId)\n column 2 - userID"
     fi
+    if [[ $2 == *"."* ]] ; then
+      if [ ! -f ~/gam/${2} ]; then
+        echo -e "No such file found:\n$2"
+        return
+      fi
+      in2csv -f csv ~/gam/${2} | csvcut -c 1,2 > ~/gam/primary_users.csv
+      csvcut -c 1 ~/gam/primary_users.csv | uniq | tr -d " " > ~/gam/primary_users_devices.csv
+      crosbatch primary_users_devices.csv
+      org_name=$2:r:u
+      ggrep "/${org_name}" ~/gam/cros_found.csv > ~/gam/IN_ORG_found.csv
+      ggrep -v "/${org_name}" ~/gam/cros_found.csv | awk -F, 'OFS="," {print $3,$5,$7}' > ~/gam/cros_in_other_orgs.csv
+      inorg=$(wc -l ~/gam/IN_ORG_found.csv | awk '{ print $1 }')
+      otherorgs=$(wc -l ~/gam/cros_in_other_orgs.csv | awk '{ print $1 }')
+      if [ $otherorgs -gt 1 ] ; then
+        echo -e "\n${cyan}Found devices placed in other OU(s):${reset}"
+        cat ~/gam/cros_in_other_orgs.csv
+      fi
+      csvcut -c 3,2 IN_ORG_found.csv | sort > IN_ORG_data.csv
+      awk -F, '{print $3}' IN_ORG_found.csv > IN_ORG_sn.csv
+      ggrep -i -f IN_ORG_sn.csv primary_users.csv | sort --ignore-case > IN_ORG_match.csv
+      paste -d "," IN_ORG_data.csv IN_ORG_match.csv > IN_ORG_batch_data.csv
+      echo "id,user" > primary_user_batch.csv && awk -F, 'OFS="," {print $2,$4}' IN_ORG_batch_data.csv >> primary_user_batch.csv
+      echo "\n${cyan}OK to update primary user on $inorg CB:s found in org ${org_name}?${reset}"
+      echo -e "(y/n)?"
+      read answer
+      if [ "$answer" != "${answer#[Yy]}" ] ; then
+        echo "Now updating all devices in file 'primary_user_batch.csv'"
+        gam csv ~/gam/primary_user_batch.csv gam update cros ~~id~~ user ~~user~~
+      else
+        echo "Ok, not performing the update."
+      fi
+    else
+      echo "no valid file found"
+    fi  
   elif [[ $1 == "retire" ]] ; then
     if [[ $# -ne 3 ]]; then
       echo "Illegal number of arguments (${#}), command must contain 3:\ncrosbatch retire XXGR 'Reason for retire device'"
       return
     fi
-    # TODO: first check and count how many to be retired (i.e. in correct OU:s), check for a reason, reveal info for user
     ggrep -E "status,deviceId|${2}" ~/gam/cros_found.csv > ~/gam/retire.csv
     ggrep -v -E "status,deviceId|${2}" ~/gam/cros_found.csv > ~/gam/not_retired.csv
     not_retired=$(wc -l ~/gam/not_retired.csv | awk '{ print $1 }')
