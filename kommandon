@@ -79,14 +79,14 @@ crosbatch() {
     while read sn
       do ggrep -i ",${sn}," ~/gam/cros.csv
     done < ~/gam/tmpcros > ~/gam/cros_found.csv
-    csvcut -c 3 cros_found.csv | awk '{ print toupper($0) }' > sn_found.csv
+    csvcut -c 3 ~/gam/cros_found.csv | awk '{ print toupper($0) }' > ~/gam/sn_found.csv
     # ggrep -if ~/gam/tmpcros ~/gam/cros.csv > ~/gam/cros_found.csv
     count_outfile=$(wc -l ~/gam/cros_found.csv | awk '{ print $1 }')
     #ggrep -if ~/gam/tmpcros ~/gam/cros.csv -o -h | ggrep -if /dev/stdin -v ~/gam/tmpcros > ~/gam/cros_notfound.txt
     comm -23 ~/gam/tmpcros ~/gam/sn_found.csv > ~/gam/cros_notfound.txt
     notfound=$(wc -l ~/gam/cros_notfound.txt | awk '{ print $1 }')
     echo -e "${white}Inputfile:${reset} ${green}${count_infile}${reset}\n${yellow}Found:${reset} ${green}${count_outfile}${reset}\n"
-	check_multiple=$(sort sn_found.csv | uniq -c | grep -v '^ *1 ')
+    check_multiple=$(sort ~/gam/sn_found.csv | uniq -c | grep -v '^ *1 ')
     if [ $check_multiple ] ; then
       echo -e "${red}WARNING! Multiple matching serial numbers found!"
       echo $check_multiple | awk '{print $2 " found " $1 " times"}'
@@ -167,7 +167,7 @@ crosbatch() {
       fi
       in2csv -f csv ~/gam/${2} | csvcut -c 1,2 > ~/gam/primary_users.csv
       csvcut -c 1 ~/gam/primary_users.csv | uniq | tr -d " " > ~/gam/primary_users_devices.csv
-      crosbatch primary_users_devices.csv
+      crosbatch ~/gam/primary_users_devices.csv
       org_name=$2:r:u
       ggrep "/${org_name}" ~/gam/cros_found.csv > ~/gam/IN_ORG_found.csv
       ggrep -v "/${org_name}" ~/gam/cros_found.csv | awk -F, 'OFS="," {print $3,$5,$7}' > ~/gam/cros_in_other_orgs.csv
