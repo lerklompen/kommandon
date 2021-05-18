@@ -98,9 +98,8 @@ crosbatch() {
       cat ~/gam/cros_notfound.txt
     fi
     cat ~/gam/cros_found.csv | awk -F, '{print $2}' > ~/gam/crosfile.txt
-    head -n 1 ~/gam/cros.csv > ~/gam/tmpcros2
-    cat ~/gam/cros_found.csv >> ~/gam/tmpcros2
-    mv ~/gam/tmpcros2 ~/gam/cros_found.csv
+    # check all found devices for "live" data (i.e. not data from downloaded nightly report), slower but more accurate!
+    gam crosfile ~/gam/crosfile.txt print fields status,deviceId,serialNumber,lastSync,model,osVersion,orgUnitPath > ~/gam/cros_found.csv
     if [[ $1 == "primary_users_devices.csv" ]] ; then
       return
     fi
