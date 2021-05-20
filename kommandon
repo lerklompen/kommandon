@@ -342,7 +342,7 @@ classroom() {
       new_owner=$2
     # transfer all classrooms
     else
-      owner=$(gam info user ${1} quick | grep 'Google Unique ID' | awk '{print $4}')
+      owner=$(gam info user ${1} fields id | grep 'Google Unique ID' | awk '{print $4}')
       echo "Getting all courses that ${1} owns..."
       gam print courses teacher ${1} fields "id,name,courseState,ownerId" | ggrep -P "${owner}|ownerId" | tee /dev/tty > ~/gam/${1}.classroom.csv
       num=$(wc -l ~/gam/${1}.classroom.csv | awk '{print $1}')
