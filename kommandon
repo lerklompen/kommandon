@@ -200,20 +200,19 @@ crosbatch() {
       echo "Illegal number of arguments (${#}), command must contain 3:\ncrosbatch retire XXGR 'Reason for retire device'"
       return
     fi
-    ggrep -E "status,deviceId|${2}" ~/gam/cros_found.csv > ~/gam/retire.csv
-    ggrep -v -E "status,deviceId|${2}" ~/gam/cros_found.csv > ~/gam/not_retired.csv
+    csvgrep -c orgUnitPath -m "${2}" ~/gam/cros_found.csv > ~/gam/retire.csv
+    csvgrep -i -c orgUnitPath -m "${2}" ~/gam/cros_found.csv > ~/gam/not_retired.csv
     not_retired=$(wc -l ~/gam/not_retired.csv | awk '{ print $1 }')
     to_retire=$(wc -l ~/gam/retire.csv | awk '{ print $1 }')
     to_retire=$(expr $to_retire - 1)
-    if [[ $not_retired != "0" ]] ; then
+    if [[ $not_retired -gt 1 ]] ; then
       echo "${yellow}${not_retired} device(s) out of scope${reset} (i.e. do not match OU), and will not be retired.\n${magenta}Check what device(s) in file:${reset}\n  ${green}not_retired.csv${reset}\n"
     fi
-    
     echo "${cyan}Retire all ${to_retire} devices in 'retire.csv' with reason '$3'?${reset}"
     echo -e "(y/n)?"
     read answer
     if [ "$answer" != "${answer#[Yy]}" ] ; then
-      ggrep -E "status,deviceId|DISABLED" ~/gam/retire.csv > ~/gam/reenable.csv
+      csvgrep -c status -m "DISABLED" ~/gam/retire.csv > ~/gam/reenable.csv
       retire_check=$(wc -l ~/gam/reenable.csv | awk '{ print $1 }')
       if [[ $retire_check == "1" ]] ; then
         echo 'No devices need to be reenabled, continuing...'
