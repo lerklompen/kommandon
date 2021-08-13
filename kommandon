@@ -121,7 +121,7 @@ crosbatch() {
     # 1=${1^^}
     echo -e "${white}To manually specify OU:${reset}\n${green}crosbatch move /orgUnitPath${reset}"
     echo -e "${white}Or continue with this command:${reset}\n${green}crosbatch move ${org}${reset}"
-    echo -e "${white}To retire correctly placed devices continue with this command:${reset}\n${green}crosbatch retire $org 'Reason for retire device'${reset}"
+    echo -e "${white}To retire correctly placed devices continue with this command:${reset}\n${green}crosbatch retire $org 'ISS-(ärende#)'${reset}"
   elif [[ $1 == "move" ]] ; then
     org=$2:u
     # 2=${2^^}
