@@ -75,7 +75,7 @@ crosbatch() {
       echo "Updating cros.csv, downloading fresh file..."
       crosprint "csv"
     fi
-    sort ~/gam/$1 | uniq | tr -d " " | awk '{ print toupper($0) }' > ~/gam/tmpcros
+    sort ~/gam/$1 | uniq | tr -d " " | awk '{ print toupper($0) }' | gsed 's/\x0D$//' > ~/gam/tmpcros
     count_infile=$(wc -l ~/gam/tmpcros  | awk '{ print $1 }')
     while read sn
       do ggrep -i ",${sn}," ~/gam/cros.csv
