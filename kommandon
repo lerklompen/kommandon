@@ -75,16 +75,21 @@ crosbatch() {
       echo "Updating cros.csv, downloading fresh file..."
       crosprint "csv"
     fi
-    sort ~/gam/$1 | uniq | tr -d " " | awk '{ print toupper($0) }' | gsed 's/\x0D$//' > ~/gam/tmpcros
-    count_infile=$(wc -l ~/gam/tmpcros  | awk '{ print $1 }')
+    # clean up inputfile
+    sort ~/gam/$1 | uniq | tr -d " " | awk '{ print toupper($0) }' | gsed 's/\x0D$//' > ~/gam/input_sn.txt
+    count_infile=$(wc -l ~/gam/input_sn.txt | awk '{ print $1 }')
+    crosColumnData=$(csvcut -n cros.csv)
+    serialColumn=$(echo $crosColumnData | grep serialNumber | awk '{print $1}' | tr -d ":")
+    deviceIdColumn=$(echo $crosColumnData | grep deviceId | awk '{print $1}' | tr -d ":")
+    statusColumn=$(echo $crosColumnData | grep deviceId | awk '{print $1}' | tr -d ":")
+    # check what serialnumbers can be found in nightly report
     while read sn
       do ggrep -i ",${sn}," ~/gam/cros.csv
-    done < ~/gam/tmpcros > ~/gam/cros_found.csv
-    csvcut -c 3 ~/gam/cros_found.csv | awk '{ print toupper($0) }' > ~/gam/sn_found.csv
-    # ggrep -if ~/gam/tmpcros ~/gam/cros.csv > ~/gam/cros_found.csv
+    done < ~/gam/input_sn.txt > ~/gam/cros_found.csv
+    csvcut -c $serialColumn ~/gam/cros_found.csv | awk '{ print toupper($0) }' > ~/gam/sn_found.csv
     count_outfile=$(wc -l ~/gam/cros_found.csv | awk '{ print $1 }')
-    #ggrep -if ~/gam/tmpcros ~/gam/cros.csv -o -h | ggrep -if /dev/stdin -v ~/gam/tmpcros > ~/gam/cros_notfound.txt
-    comm -23 ~/gam/tmpcros ~/gam/sn_found.csv > ~/gam/cros_notfound.txt
+    # compare input to what was found
+    comm -23 ~/gam/input_sn.txt ~/gam/sn_found.csv > ~/gam/cros_notfound.txt
     notfound=$(wc -l ~/gam/cros_notfound.txt | awk '{ print $1 }')
     echo -e "${white}Inputfile:${reset} ${green}${count_infile}${reset}\n${yellow}Found:${reset} ${green}${count_outfile}${reset}\n"
     check_multiple=$(sort ~/gam/sn_found.csv | uniq -c | grep -v '^ *1 ')
@@ -98,26 +103,40 @@ crosbatch() {
       echo "${red}Did not find the following serial numbers:${reset}"
       cat ~/gam/cros_notfound.txt
     fi
-    cat ~/gam/cros_found.csv | awk -F, '{print $2}' > ~/gam/crosfile.txt
-    # check all found devices for "live" data (i.e. not data from downloaded nightly report), slower but more accurate!
-    gam crosfile ~/gam/crosfile.txt print fields status,deviceId,serialNumber,lastSync,model,osVersion,orgUnitPath > ~/gam/cros_found.csv
+    # check "live data"
+    csvcut -c $deviceIdColumn ~/gam/cros_found.csv > ~/gam/crosfile.txt
+    gam crosfile ~/gam/crosfile.txt print fields status,deviceId,serialNumber,lastSync,model,osVersion,user,orgUnitPath > ~/gam/cros_livedata.csv
+    # search for and remove deprovisioned devices
+    csvgrep -c status -m DEPROVISIONED ~/gam/cros_livedata.csv | csvcut -c deviceId,serialNumber,orgUnitPath > ~/gam/cros_deprovisioned.csv
+    csvgrep -i -c status -m DEPROVISIONED ~/gam/cros_livedata.csv > ~/gam/cros_notdeprovisioned.csv
+    deprovisionedDevices=$(wc -l ~/gam/cros_deprovisioned.csv | awk '{ print $1 }')
+    if [ $deprovisionedDevices -gt 1 ] ; then
+      echo -e "\n${cyan}The following deprovisioned devices were removed from the list:${reset}"
+      cat ~/gam/cros_deprovisioned.csv
+      csvcut -c deviceId ~/gam/cros_livedata.csv | gsed 1d > ~/gam/crosfile.txt
+    fi
     if [[ $1 == "primary_users_devices.csv" ]] ; then
       return
     fi
-    # what OU are we checking?
+    # get orgUnit from name of input file
     org=${1%.*}
     org=${org:u}
-    #echo -e "\nFound devices placed in current OU(s):"
-    #cat ~/gam/cros_found.csv | tail -n +2 | awk -F, '{print $7}' | sort | uniq
-    ggrep -v "$org" ~/gam/cros_found.csv | awk -F, 'OFS="," {print $3,$5,$7}' > ~/gam/cros_in_other_orgs.csv
+    # check what orgunits found CB:S are placed in
+    csvgrep -i -c orgUnitPath -m "$org" ~/gam/cros_notdeprovisioned.csv | csvcut -c serialNumber,orgUnitPath | csvsort -c orgUnitPath > ~/gam/cros_in_other_orgs.csv
+    ggrep -E '0[01]-Chromebook' ~/gam/cros_in_other_orgs.csv > ~/gam/00-Chromebook.csv
+    gsed -i '/0[01]-Chromebook/d' ~/gam/cros_in_other_orgs.csv
+    newChromebooks=$(wc -l ~/gam/00-Chromebook.csv | awk '{ print $1 }')
     otherorgs=$(wc -l ~/gam/cros_in_other_orgs.csv | awk '{ print $1 }')
+    if [ $newChromebooks -gt 0 ] ; then
+      echo -e "\n${cyan}Found ${newChromebooks} new devices (in OU 00/01-Chromebook)${reset}"
+    fi
     if [ $otherorgs -gt 1 ] ; then
       echo -e "\n${cyan}Found devices placed in other OU(s):${reset}"
       cat ~/gam/cros_in_other_orgs.csv
     else
       echo -e "\n${cyan}All devices found are already placed in ${org}${reset}\n"
     fi
-    echo -e "\n${magenta}To examine the results, look in the file:${reset}\n  ${green}cros_found.csv${reset}\n"
+    echo -e "\n${magenta}To examine the results, look in the file:${reset}\n  ${green}cros_livedata.csv${reset}\n"
     # 1=${1^^}
     echo -e "${white}To manually specify OU:${reset}\n${green}crosbatch move /orgUnitPath${reset}"
     echo -e "${white}Or continue with this command:${reset}\n${green}crosbatch move ${org}${reset}"
@@ -127,9 +146,9 @@ crosbatch() {
     # 2=${2^^}
     if [[ $org == *"/"* ]] ; then
       ou=${2}
-    elif [[ $org =~ GR$ || $org =~ GRS$ || $org =~ EST$ ]] ; then
+    elif [[ $org =~ GR$ || $org =~ GRS$ || $org =~ GRSU$ || $org =~ EST$ ]] ; then
       ou="/171/Elev/${org}"
-    elif [[ $org =~ GY$ || $org =~ GYS$ || $org =~ KV$ || $org =~ SFI$ || $org =~ SUV$ || $org =~ YH$ ]] ; then
+    elif [[ $org =~ GY$ || $org =~ GYS$ || $org =~ KV$ || $org =~ SFI$ || $org =~ SUV$ || $org =~ YH$ ]] ; then
       ou="/170/Elev/${org}"
     else
       echo "error..."
@@ -168,6 +187,7 @@ crosbatch() {
       # TODO - check if user really needs to be updated, i.e perform check against current user
       in2csv -f csv ~/gam/${2} | csvcut -c 1,2 | sort > ~/gam/primary_userlist.csv
       csvcut -c 1 ~/gam/primary_users.csv | uniq | tr -d " " > ~/gam/primary_users_devices.csv
+      # does not work here to use full path!
       crosbatch primary_users_devices.csv
       org_name=$2:r:u
       csvgrep -c orgUnitPath -m "/${org_name}" ~/gam/cros_found.csv | csvsort -c serialNumber > ~/gam/IN_ORG_found.csv
@@ -181,7 +201,7 @@ crosbatch() {
       csvcut -c deviceId,serialNumber IN_ORG_found.csv | gsed 1d > IN_ORG_data.csv
       csvcut -c serialNumber IN_ORG_found.csv | gsed 1d > IN_ORG_sn.csv
       ggrep -i -f IN_ORG_sn.csv primary_users.csv > IN_ORG_match.csv
-	    #TODO - make sure the serialNumber matches
+	  #TODO - make sure the serialNumber matches
       echo "deviceId,serial,match_serial,user" > IN_ORG_batch_data.csv && paste -d "," IN_ORG_data.csv IN_ORG_match.csv >> IN_ORG_batch_data.csv
       echo "\n${cyan}OK to update primary user on $(($inorg-1)) CB:s found in org ${org_name}?${reset}"
       echo -e "(y/n)?"
@@ -194,7 +214,7 @@ crosbatch() {
       fi
     else
       echo "no valid file found"
-    fi 
+    fi  
   elif [[ $1 == "retire" ]] ; then
     if [[ $# -ne 3 ]]; then
       echo "Illegal number of arguments (${#}), command must contain 3:\ncrosbatch retire XXGR 'Reason for retire device'"
