@@ -198,11 +198,11 @@ crosbatch() {
         echo -e "\n${cyan}Found devices placed in other OU(s):${reset}"
         cat ~/gam/cros_in_other_orgs.csv
       fi
-      csvcut -c deviceId,serialNumber IN_ORG_found.csv | gsed 1d > IN_ORG_data.csv
-      csvcut -c serialNumber IN_ORG_found.csv | gsed 1d > IN_ORG_sn.csv
-      ggrep -i -f IN_ORG_sn.csv primary_users.csv > IN_ORG_match.csv
+      csvcut -c deviceId,serialNumber ~/gam/IN_ORG_found.csv | gsed 1d > ~/gam/IN_ORG_data.csv
+      csvcut -c serialNumber ~/gam/IN_ORG_found.csv | gsed 1d > ~/gam/IN_ORG_sn.csv
+      ggrep -i -f ~/gam/IN_ORG_sn.csv ~/gam/primary_users.csv > ~/gam/IN_ORG_match.csv
 	  #TODO - make sure the serialNumber matches
-      echo "deviceId,serial,match_serial,user" > IN_ORG_batch_data.csv && paste -d "," IN_ORG_data.csv IN_ORG_match.csv >> IN_ORG_batch_data.csv
+      echo "deviceId,serial,match_serial,user" > ~/gam/IN_ORG_batch_data.csv && paste -d "," ~/gam/IN_ORG_data.csv ~/gam/IN_ORG_match.csv >> ~/gam/IN_ORG_batch_data.csv
       echo "\n${cyan}OK to update primary user on $(($inorg-1)) CB:s found in org ${org_name}?${reset}"
       echo -e "(y/n)?"
       read answer
@@ -214,7 +214,7 @@ crosbatch() {
       fi
     else
       echo "no valid file found"
-    fi  
+    fi   
   elif [[ $1 == "retire" ]] ; then
     if [[ $# -ne 3 ]]; then
       echo "Illegal number of arguments (${#}), command must contain 3:\ncrosbatch retire XXGR 'Reason for retire device'"
