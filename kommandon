@@ -186,10 +186,13 @@ crosbatch() {
       fi
       # TODO - check if user really needs to be updated, i.e perform check against current user
       in2csv -f csv ~/gam/${2} | csvcut -c 1,2 | sort > ~/gam/primary_userlist.csv
-      csvcut -c 1 ~/gam/primary_users.csv | uniq | tr -d " " > ~/gam/primary_users_devices.csv
+      csvcut -c 1 ~/gam/primary_userlist.csv | uniq | tr -d " " > ~/gam/primary_users_devices.csv
       # does not work here to use full path!
       crosbatch primary_users_devices.csv
       org_name=$2:r:u
+      # insert header in cros_found.csv
+      header=$(head -n 1 cros.csv)
+      gsed -i "1i $header" ~/gam/cros_found.csv
       csvgrep -c orgUnitPath -m "/${org_name}" ~/gam/cros_found.csv | csvsort -c serialNumber > ~/gam/IN_ORG_found.csv
       csvgrep -i -c orgUnitPath -m "/${org_name}" ~/gam/cros_found.csv | csvcut -c serialNumber,model,orgUnitPath > ~/gam/cros_in_other_orgs.csv
       inorg=$(wc -l ~/gam/IN_ORG_found.csv | awk '{ print $1 }')
@@ -200,7 +203,7 @@ crosbatch() {
       fi
       csvcut -c deviceId,serialNumber ~/gam/IN_ORG_found.csv | gsed 1d > ~/gam/IN_ORG_data.csv
       csvcut -c serialNumber ~/gam/IN_ORG_found.csv | gsed 1d > ~/gam/IN_ORG_sn.csv
-      ggrep -i -f ~/gam/IN_ORG_sn.csv ~/gam/primary_users.csv > ~/gam/IN_ORG_match.csv
+      ggrep -i -f ~/gam/IN_ORG_sn.csv ~/gam/primary_userlist.csv > ~/gam/IN_ORG_match.csv
 	  #TODO - make sure the serialNumber matches
       echo "deviceId,serial,match_serial,user" > ~/gam/IN_ORG_batch_data.csv && paste -d "," ~/gam/IN_ORG_data.csv ~/gam/IN_ORG_match.csv >> ~/gam/IN_ORG_batch_data.csv
       echo "\n${cyan}OK to update primary user on $(($inorg-1)) CB:s found in org ${org_name}?${reset}"
@@ -214,12 +217,15 @@ crosbatch() {
       fi
     else
       echo "no valid file found"
-    fi   
+    fi  
   elif [[ $1 == "retire" ]] ; then
     if [[ $# -ne 3 ]]; then
       echo "Illegal number of arguments (${#}), command must contain 3:\ncrosbatch retire XXGR 'Reason for retire device'"
       return
     fi
+    # insert header in cros_found.csv
+    header=$(head -n 1 cros.csv)
+    gsed -i "1i $header" ~/gam/cros_found.csv
     csvgrep -c orgUnitPath -m "${2}" ~/gam/cros_found.csv > ~/gam/retire.csv
     csvgrep -i -c orgUnitPath -m "${2}" ~/gam/cros_found.csv > ~/gam/not_retired.csv
     not_retired=$(wc -l ~/gam/not_retired.csv | awk '{ print $1 }')
