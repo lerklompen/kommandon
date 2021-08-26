@@ -133,7 +133,8 @@ crosbatch() {
     if [ $otherorgs -gt 1 ] ; then
       echo -e "\n${cyan}Found devices placed in other OU(s):${reset}"
       cat ~/gam/cros_in_other_orgs.csv
-    else
+    fi
+    if [ $newChromebooks -eq 0 ] && [ $otherorgs -eq 1 ] ; then
       echo -e "\n${cyan}All devices found are already placed in ${org}${reset}\n"
     fi
     echo -e "\n${magenta}To examine the results, look in the file:${reset}\n  ${green}cros_livedata.csv${reset}\n"
