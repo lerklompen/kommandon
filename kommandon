@@ -268,6 +268,9 @@ autoload colors; colors
   elif [[ $1 == "full" ]] ; then
     gam report admin user all filter "USER_EMAIL==${2%%@*}@skola.malmo.se" \
         | csvcut -C actor.callerType,actor.profileId,id.customerId,id.uniqueQualifier,ipAddress,type,id.applicationName
+  elif [[ $1 == "cros" ]] ; then
+    gam report admin user all filter "DEVICE_SERIAL_NUMBER==${2}" \
+        | csvcut -C DEVICE_TYPE,actor.callerType,actor.profileId,id.applicationName,id.customerId,id.uniqueQualifier,type
   else
     gam report admin user all filter "USER_EMAIL==${1%%@*}@skola.malmo.se" \
         | csvcut -C actor.callerType,actor.profileId,id.customerId,id.uniqueQualifier,ipAddress,type,id.applicationName \
