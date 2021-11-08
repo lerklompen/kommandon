@@ -205,7 +205,7 @@ crosbatch() {
       csvcut -c deviceId,serialNumber ~/gam/IN_ORG_found.csv | gsed 1d > ~/gam/IN_ORG_data.csv
       csvcut -c serialNumber ~/gam/IN_ORG_found.csv | gsed 1d > ~/gam/IN_ORG_sn.csv
       ggrep -i -f ~/gam/IN_ORG_sn.csv ~/gam/primary_userlist.csv > ~/gam/IN_ORG_match.csv
-	  #TODO - make sure the serialNumber matches
+      #TODO - make sure the serialNumber matches
       echo "deviceId,serial,match_serial,user" > ~/gam/IN_ORG_batch_data.csv && paste -d "," ~/gam/IN_ORG_data.csv ~/gam/IN_ORG_match.csv >> ~/gam/IN_ORG_batch_data.csv
       echo "\n${cyan}OK to update primary user on $(($inorg-1)) CB:s found in org ${org_name}?${reset}"
       echo -e "(y/n)?"
