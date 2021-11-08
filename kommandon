@@ -103,9 +103,14 @@ crosbatch() {
       echo "${red}Did not find the following serial numbers:${reset}"
       cat ~/gam/cros_notfound.txt
     fi
-    # check "live data"
     csvcut -c $deviceIdColumn ~/gam/cros_found.csv > ~/gam/crosfile.txt
-    gam crosfile ~/gam/crosfile.txt print fields status,deviceId,serialNumber,lastSync,model,osVersion,user,orgUnitPath > ~/gam/cros_livedata.csv
+    # check "live data" if not "ATEA"
+    if [[ $2 != "ATEA" ]] ; then
+      gam crosfile ~/gam/crosfile.txt print fields status,deviceId,serialNumber,lastSync,model,osVersion,user,orgUnitPath > ~/gam/cros_livedata.csv
+    else
+      echo "ATEA"
+      return
+    fi
     # search for and remove deprovisioned devices
     csvgrep -c status -m DEPROVISIONED ~/gam/cros_livedata.csv | csvcut -c deviceId,serialNumber,orgUnitPath > ~/gam/cros_deprovisioned.csv
     csvgrep -i -c status -m DEPROVISIONED ~/gam/cros_livedata.csv > ~/gam/cros_notdeprovisioned.csv
