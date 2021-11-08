@@ -191,7 +191,7 @@ crosbatch() {
         return
       fi
       # TODO - check if user really needs to be updated, i.e perform check against current user
-      in2csv -f csv ~/gam/${2} | csvcut -c 1,2 | sort > ~/gam/primary_userlist.csv
+      in2csv -f csv ~/gam/${2} | csvcut -c 1,2 | sort | gsed 's/@skola.malmo.se//g' > ~/gam/primary_userlist.csv
       csvcut -c 1 ~/gam/primary_userlist.csv | uniq | tr -d " " > ~/gam/primary_users_devices.csv
       # does not work here to use full path!
       crosbatch primary_users_devices.csv
