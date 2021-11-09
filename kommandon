@@ -76,12 +76,12 @@ crosbatch() {
       crosprint "csv"
     fi
     # clean up inputfile
-    sort ~/gam/$1 | uniq | tr -d " " | awk '{ print toupper($0) }' | gsed 's/\x0D$//' > ~/gam/input_sn.txt
+    cat ~/gam/$1 | tr -d " " | awk '{ print toupper($0) }' | gsed 's/\x0D$//' | sort | uniq > ~/gam/input_sn.txt
     count_infile=$(wc -l ~/gam/input_sn.txt | awk '{ print $1 }')
     crosColumnData=$(csvcut -n cros.csv)
-    serialColumn=$(echo $crosColumnData | grep serialNumber | awk '{print $1}' | tr -d ":")
-    deviceIdColumn=$(echo $crosColumnData | grep deviceId | awk '{print $1}' | tr -d ":")
-    statusColumn=$(echo $crosColumnData | grep deviceId | awk '{print $1}' | tr -d ":")
+    serialColumn=$(echo $crosColumnData | ggrep serialNumber | awk '{print $1}' | tr -d ":")
+    deviceIdColumn=$(echo $crosColumnData | ggrep deviceId | awk '{print $1}' | tr -d ":")
+    statusColumn=$(echo $crosColumnData | ggrep deviceId | awk '{print $1}' | tr -d ":")
     # check what serialnumbers can be found in nightly report
     while read sn
       do ggrep -i ",${sn}," ~/gam/cros.csv
