@@ -14,6 +14,11 @@ export NLS_LANG=.AL32UTF8
 ad_conf='ldaps://_ldapurl_:636'
 ad_user='_userid_'
 
+# Approve apps in Play for work
+approve() {
+  open -a "Google Chrome" "https://play.google.com/work/apps/details?id=${1}"
+}
+
 ##### GAM functions
 # Search staff by userID
 userid() {
