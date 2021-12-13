@@ -37,11 +37,11 @@ if [[ ($# -eq 2) ]] ; then
     gam update cros query id:${1} action disable
   else
     if [[ $2 == *"/"* ]] ; then
-      gam update cros query id:${1} org ${2}
+      gam update cros query id:${1} org ${2} quickcrosmove False nobatchupdate
     elif [[ $2 =~ GR$ || $2 =~ GRS$ || $2 =~ EST$ || $2 =~ GRSU$ ]] ; then
-      gam update cros query id:${1} org /171/Elev/${2}
+      gam update cros query id:${1} org /171/Elev/${2} quickcrosmove False nobatchupdate
     elif [[ $2 =~ GY$ || $2 =~ GYS$ || $2 =~ KV$ || $2 =~ SFI$ || $2 =~ SUV$ || $2 =~ YH$ ]] ; then
-      gam update cros query id:${1} org /170/Elev/${2}
+      gam update cros query id:${1} org /170/Elev/${2} quickcrosmove False nobatchupdate
     else
       echo "unknown org or command"
     fi
@@ -173,7 +173,7 @@ crosbatch() {
       echo "Now moving all devices to $ou"
       gsed '1i\id' ~/gam/crosfile.txt > ~/gam/crosfile.csv
       #gam crosfile ~/gam/crosfile.txt update org $ou && gam print cros limittoou $ou > ~/gam/croscomp.csv
-      gam csv ~/gam/crosfile.csv gam update cros ~~id~~ org $ou && gam print cros limittoou $ou > ~/gam/croscomp.csv
+      gam csv ~/gam/crosfile.csv gam update cros ~~id~~ org quickcrosmove False nobatchupdate $ou && gam print cros limittoou $ou > ~/gam/croscomp.csv
       ggrep -f ~/gam/crosfile.txt ~/gam/croscomp.csv > ~/gam/croscomp_found.csv
       ggrep -v -f ~/gam/croscomp_found.csv ~/gam/crosfile.txt > ~/gam/temp_found
       cros_remain=$(wc -l ~/gam/temp_found  | awk '{ print $1 }')
@@ -258,7 +258,7 @@ crosbatch() {
         gam csv ~/gam/reenable.csv gam update cros ~~deviceId~~ action reenable
       fi
       echo 'Now retiring...'
-      gam csv ~/gam/retire.csv gam update cros ~~deviceId~~ user ~~orgUnitPath~~ notes "${3}" ou /RETIRED
+      gam csv ~/gam/retire.csv gam update cros ~~deviceId~~ user ~~orgUnitPath~~ notes "${3}" ou /RETIRED quickcrosmove False nobatchupdate
     fi
   else
     echo -e "Please specify a file containing one serial number per row!"
