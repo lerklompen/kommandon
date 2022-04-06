@@ -3,7 +3,7 @@
 # GAMADV-xtd3
 # (pip3 install --user --upgrade pip) - stay updated!
 # pip3 install --user csvkit
-# for MAC also install Homebrew and then coreutils and sqlplus
+# for MAC also install Homebrew and then coreutils and gnumeric (convert to xlsx)
 
 # csvkit (and other "pip" installations)
 export PATH=$PATH:~/.local/bin
@@ -291,14 +291,36 @@ autoload colors; colors
   fi
 }
 
-# "crosprint" for full report, "crosprint csv" for minimal csv file
+# "crosprint" conversion to xlsx, "crosprint csv" for csv file only
 crosprint() {
   if [ $# -eq 0 ] ; then
-    gam user admin get drivefile 1adBFsynFBi5BHuHWh5u33oEvIiYHVeY8V5OQ2gYSVl4 format xlsx targetfolder ~/gam
+    crosprintcheck
+    crosprintfile="crosprint$(gdate '+%Y%m%d').xlsx"
+    ssconvert crosprint.csv $crosprintfile
   elif [[ $1 =~ ^(csv)$ ]] ; then
     gam user admin get drivefile 1tQj_Zhb2OI0kAnQEk3xxbTOnfxBkusFBFppouqCBh7c csvsheet crosprint.csv targetfolder ~/gam targetname crosprint.csv overwrite true \
          && csvcut -c status,deviceId,serialNumber,lastSync,model,osVersion,orgUnitPath ~/gam/crosprint.csv > ~/gam/cros.csv
   fi
+}
+
+crosprintcheck() {
+  if [ ! -f $HOME/gam/crosprint.csv ]; then
+    echo "Did not find file 'crosprint.csv', now downloading csv file..."
+    crosprintdownload
+  else 
+    # check if cros.csv needs to be "refreshed"
+    if test $(find ~/gam/crosprint.csv -mmin +480) ; then
+      echo "Updating crosprint.csv, downloading fresh file..."
+      crosprintdownload
+    else
+      echo "fresh crosprint found, not downloading..."  
+    fi
+  fi
+}
+
+crosprintdownload() {
+  gam user admin get drivefile 1tQj_Zhb2OI0kAnQEk3xxbTOnfxBkusFBFppouqCBh7c csvsheet crosprint.csv targetfolder ~/gam targetname crosprint.csv overwrite true \
+      && csvcut -c status,deviceId,serialNumber,lastSync,model,osVersion,orgUnitPath ~/gam/crosprint.csv > ~/gam/cros.csv
 }
 
 userprint () {
