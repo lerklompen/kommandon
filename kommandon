@@ -266,6 +266,10 @@ crosbatch() {
   fi
 }
 
+croslog() {
+  gam report admin user all filter "DEVICE_SERIAL_NUMBER==${1}"
+}
+
 # Search the "audit log"
 report() {
 autoload colors; colors
