@@ -267,7 +267,7 @@ crosbatch() {
 }
 
 croslog() {
-  gam report admin user all filter "DEVICE_SERIAL_NUMBER==${1}"
+  gam report admin user all filter "DEVICE_SERIAL_NUMBER==${1}" | csvcut -C 'DEVICE_TYPE,actor.callerType,actor.profileId,id.applicationName,id.customerId,id.uniqueQualifier,type'
 }
 
 # Search the "audit log"
