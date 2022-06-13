@@ -34,9 +34,14 @@ cbmanager() {
     echo "removing ${2} from cbamanager"
     gam update user ${2} clearschema cbManager
   else
-    print
-    gam group cbmanager print users fields orgUnitPath customschemas cbManager > cbmanagers.txt
-    cat cbmanager.txt | gsed 's/customSchemas\.cbManager\.//g' | gsed 's/UnitPath//g' | gsed 's/@skola.malmo.se//g' | gsed -r 's/\/Personal\/[a-öA-Ö]+//g' | csvsort -S -c org,manageOrgs | csvcut -c primaryEmail,org,manageOrgs | csvformat -D ";" | tr -d '\"' | ggrep -E -v '^utbtes|^pi\.admin' | awk -F ";" '{ printf("%-40s%-10s%-15s\n", $1, $2, $3); }'
+    gam group cbmanager print users fields orgUnitPath customschemas cbManager > cbmanager.csv
+    printf "--------------------------------------------------------------\n\n"
+    cat cbmanager.csv | gsed 's/customSchemas\.cbManager\.//g' | gsed 's/UnitPath//g' | gsed 's/primaryE/e/g' | \
+    gsed 's/@skola.malmo.se//g' | gsed -r 's/\/Personal\/[a-öA-Ö]+//g' | gsed 's/@skola.malmo.se//g' | \
+    gsed 's/,\/170,/,170,/g' | gsed 's/,\/171,/,171,/g' | csvsort -S -c org,manageOrgs | \
+    csvcut -c email,org,manageOrgs | csvformat -D ";" | tr -d '\"' | \
+    ggrep -E -v '^utbtes|^pi\.admin' | awk -F ";" '{ printf("%-40s%-10s%-15s\n", $1, $2, $3); }' | \
+    awk -v bld=$(tput bold) -v rst=$(tput sgr0) 'NR == 1{$0 = bld$0rst} 1'
   fi
 }
 
