@@ -25,6 +25,21 @@ userid() {
   gam info users query employmentData.userID=${1}
 }
 
+# list and manage authorization for CB Manager
+cbmanager() {
+  if [[ $1 == "add" ]] ; then
+    echo "adding ${2} to cbamanager with scope ${3}"
+    gam update user ${2} cbManager.manageOrgs "${3}" cbManager.authorized true
+  elif [[ $1 == "del" || $1 == "delete" || $1 == "remove" ]] ; then
+    echo "removing ${2} from cbamanager"
+    gam update user ${2} clearschema cbManager
+  else
+    print
+    gam group cbmanager print users fields orgUnitPath customschemas cbManager > cbmanagers.txt
+    cat cbmanager.txt | gsed 's/customSchemas\.cbManager\.//g' | gsed 's/UnitPath//g' | gsed 's/@skola.malmo.se//g' | gsed -r 's/\/Personal\/[a-öA-Ö]+//g' | csvsort -S -c org,manageOrgs | csvcut -c primaryEmail,org,manageOrgs | csvformat -D ";" | tr -d '\"' | ggrep -E -v '^utbtes|^pi\.admin' | awk -F ";" '{ printf("%-40s%-10s%-15s\n", $1, $2, $3); }'
+  fi
+}
+
 # info and actions on ChromeOS devices
 cros() {
 if [[ ($# -eq 2) ]] ; then
