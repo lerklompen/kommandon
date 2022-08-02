@@ -343,6 +343,8 @@ crosprintcheck() {
 }
 
 crosprintdownload() {
+  checkdate=$(gam user admin show fileinfo 1tQj_Zhb2OI0kAnQEk3xxbTOnfxBkusFBFppouqCBh7c fields modifiedTime | ggrep modifiedTime | awk '{print $2}')
+  echo "Online file last updated ${checkdate[(ws:T:)1]}"
   gam user admin get drivefile 1tQj_Zhb2OI0kAnQEk3xxbTOnfxBkusFBFppouqCBh7c csvsheet crosprint.csv targetfolder ~/gam targetname crosprint.csv overwrite true \
       && csvcut -c status,deviceId,serialNumber,lastSync,model,osVersion,orgUnitPath ~/gam/crosprint.csv > ~/gam/cros.csv
 }
