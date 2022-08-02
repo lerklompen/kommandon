@@ -480,37 +480,46 @@ resource() {
   white="$bg[white]$fg[black]"
   blue="$bg[blue]$fg[black]"
   reset="$reset_color"
-  #name=$(echo $1 | awk '{ gsub (" ", "-", $0); print}')
-  
-  # prep admin + groups
-  ou=$(echo "$1:l" | awk -F"-" '{print $1}')
-  extens="$ou:u"
-  if [ "$ou" = "rögr" ] ; then
-    ou="rogr1"
-  elif [ "$ou" = "mögr" ] ; then
-    ou="mogr1"
+  if [ $# -eq 0 ]; then
+    echo "Example (remember the qoutes!):"
+    echo "${yellow}resource \"MÖGR-Grupprum 8\"${reset}"
+    echo "Will output GAM-commands to copy and run"
+    echo "\nTo alter admin account:"
+    echo "${cyan}resource \"ROGR-Grupprum 8\" abgr.admin${reset}"
+  elif [ $# -ne 0 ]; then
+    # prep admin + groups
+    ou=$(echo "$1:l" | awk -F"-" '{print $1}')
+    extens="$ou:u"
+    if [ "$ou" = "rögr" ] ; then
+      ou="rogr1"
+    elif [ "$ou" = "mögr" ] ; then
+      ou="mogr1"
+    fi
+    ou=${ou//å/a}
+    ou=${ou//ä/a}
+    ou=${ou//ö/o}
+    personal="$ou.personal"
+    if [ $# -eq 2 ]; then
+      admin=$2
+    else
+      admin="$ou.admin"
+    fi
+    # prep id
+    id="$1:l"
+    id=${id// /-}
+    if [ "$extens" = "RÖGR" ] ; then
+      id=$(echo $id | awk -F"-" '$1="rögr" {OFS="-"; $1="rogr1" ; print $0}')
+    elif [ "$extens" = "MÖGR" ] ; then
+      id=$(echo $id | awk -F"-" '$1="mögr" {OFS="-"; $1="mogr1" ; print $0}')
+    fi
+    id=${id//å/a}
+    id=${id//ä/a}
+    id=${id//ö/o}
+    
+    echo Run the following GAM-commands:
+    echo "${green}gam create resource $id '$1' description '$1' type '$extens Resurs'"
+    echo "gam resource $id add acls owner $admin && gam user $admin modify calendars resource $id timezone 'Europe/Stockholm'\ngam resource $id add acls reader $personal${reset}"
   fi
-  ou=${ou//å/a}
-  ou=${ou//ä/a}
-  ou=${ou//ö/o}
-  personal="$ou.personal"
-  admin="$ou.admin"
-  
-  # prep id
-  id="$1:l"
-  id=${id// /-}
-  if [ "$extens" = "RÖGR" ] ; then
-    id=$(echo $id | awk -F"-" '$1="rögr" {OFS="-"; $1="rogr1" ; print $0}')
-  elif [ "$extens" = "MÖGR" ] ; then
-    id=$(echo $id | awk -F"-" '$1="mögr" {OFS="-"; $1="mogr1" ; print $0}')
-  fi
-  id=${id//å/a}
-  id=${id//ä/a}
-  id=${id//ö/o}
-  
-  echo Run the following GAM-commands:
-  echo "${green}gam create resource $id '$1' description '$1' type '$extens Resurs'"
-  echo "gam resource $id add acls owner $admin && gam user $admin modify calendars resource $id timezone 'Europe/Stockholm'\ngam resource $id add acls reader $personal${reset}"
 }
 
 
