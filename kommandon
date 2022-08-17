@@ -646,10 +646,12 @@ ADgroup() {
 # aliases
 alias profile='nano ~/.kommandon && source ~/.kommandon'
 alias gam='~/bin/gamadv-xtd3/gam'
-alias kommandoupdate='bash <(curl -s -S -L https://git.io/Jesrp)'
-alias commandupdate='bash <(curl -s -S -L https://git.io/Jesrp)'
-alias updatekommando='bash <(curl -s -S -L https://git.io/Jesrp)'
-alias updatecommand='bash <(curl -s -S -L https://git.io/Jesrp)'
+alias kommandupdate='curl https://raw.githubusercontent.com/lerklompen/kommandon/master/kommandon > ~/.kommandon'
+alias kommandoupdate='curl https://raw.githubusercontent.com/lerklompen/kommandon/master/kommandon > ~/.kommandon'
+alias commandupdate='curl https://raw.githubusercontent.com/lerklompen/kommandon/master/kommandon > ~/.kommandon'
+alias updatekommando='curl https://raw.githubusercontent.com/lerklompen/kommandon/master/kommandon > ~/.kommandon'
+alias updatekommand='curl https://raw.githubusercontent.com/lerklompen/kommandon/master/kommandon > ~/.kommandon'
+alias updatecommand='curl https://raw.githubusercontent.com/lerklompen/kommandon/master/kommandon > ~/.kommandon'
 
 ### GAM
 alias user='gam info user'
