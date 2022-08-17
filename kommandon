@@ -198,7 +198,7 @@ crosbatch() {
       ggrep -v -f ~/gam/croscomp_found.csv ~/gam/crosfile.txt > ~/gam/temp_found
       cros_remain=$(wc -l ~/gam/temp_found  | awk '{ print $1 }')
       if [[ "$cros_remain" == "0" ]] ; then
-        echo "OK all devices now moved successfully!"
+        echo "${num} CB nu flyttade till ${ou}"
       else
         mv ~/gam/temp_found ~/gam/crosfile.txt
         echo "$cros_remain device(s) not moved - please run the last command again"
